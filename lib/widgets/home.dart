@@ -1,0 +1,116 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:stad/widgets/bottom_up_panel.dart';
+
+
+import 'package:stad/keys.dart';
+import 'package:stad/models.dart';
+import 'package:stad/utilities.dart';
+import 'package:stad/widgets/fav_drawer.dart';
+import 'package:stad/widgets/search_app_bar.dart';
+import 'package:stad/widgets/search_stops.dart';
+import 'package:stad/widgets/slide_open_panel.dart';
+
+class Home extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() => HomeState();
+}
+
+class HomeState extends State<Home> {
+  bool searching = false;
+  List<String> currentFavourites;
+  List searchedStops;
+  Stop selectedStop;
+  final TextEditingController searchFieldController = TextEditingController();
+  final PanelController _panelController = PanelController();
+  final mapCompleter = Completer<GoogleMapController>();
+
+  @override
+  void initState() {
+    super.initState();
+    Favourites().getFavourites().then((favs) =>
+        setState(() => currentFavourites = favs));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    var body = <Widget>[getBody()];
+    body.add(Positioned(
+        top: 0.0,
+        left: 0.0,
+        right: 0.0,
+        child: SearchAppBar(
+          scaffoldKey: Keys.scaffoldKey,
+          onTapCallback: startSearching,
+          searching: searching,
+          backCallback: clearSearch,
+          handleInputCallback: searchForStopMatching,
+          textFieldController: searchFieldController,
+        )
+    ));
+
+    return Scaffold(
+      key: Keys.scaffoldKey,
+      drawer: FavDrawer(favourites: currentFavourites, onStopTap: closeFavsOnSelect,),
+      body: Stack(children: body, )
+    );
+  }
+
+  Widget getBody() {
+    if (searching) {
+      if(searchedStops == null) searchedStops = currentFavourites;
+      return SearchStops(stops: searchedStops, stopTapCallback: selectStopInSearch,);
+    }
+    else {
+      return Container(
+        child: BottomUpPanel(stop: selectedStop, mapCompleter: mapCompleter, stopTapCallback: selectStopInSearch,),
+      );
+    }
+  }
+
+  void startSearching() => setState(() => searching = true);
+
+  void closeFavsOnSelect(Stop stop) {
+    Navigator.of(context).pop();
+    selectStopInSearch(stop);
+  }
+
+  void selectStopInSearch(Stop stop) {
+    clearSearchToString(stop.toString());
+    moveMapCameraTo(stop.latLng.latitude, stop.latLng.longitude);
+    setState(() {
+      selectedStop = stop;
+    });
+  }
+
+  void moveMapCameraTo(double lat, double lng) {
+    mapCompleter.future.then((controller){
+      controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
+          target: LatLng(lat, lng), zoom: 17)));
+    });
+  }
+
+  void clearSearchToString(String string) {
+    clearSearch();
+    searchFieldController.text = string;
+  }
+
+  void clearSearch() { 
+    setState(() {
+      searching = false;
+      selectedStop = null;
+    });
+    searchFieldController.text = "";
+    FocusScope.of(context).requestFocus(new FocusNode());
+  }
+
+  void searchForStopMatching(String string) async {
+    var db = new RouteDB();
+    final list = await db.getStopsMatchingParm(string);
+    setState(() {
+      searchedStops = list;
+    });
+  }
+}
