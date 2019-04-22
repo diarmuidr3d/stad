@@ -26,6 +26,7 @@ class HomeState extends State<Home> {
   final TextEditingController searchFieldController = TextEditingController();
   final PanelController _panelController = PanelController();
   var mapCompleter = Completer<GoogleMapController>();
+  double parallax = 0.0;
 
   @override
   void initState() {
@@ -36,10 +37,16 @@ class HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-//    var body = <Widget>[getBody()];
     var body = <Widget>[
-      TransitMap(controller: mapCompleter, onStopTapped: selectStopInSearch,),
-      BottomUpPanel(stop: selectedStop,),
+      Positioned(
+        top: parallax,
+        child: Container(
+          height: MediaQuery.of(context).size.height,
+          width: MediaQuery.of(context).size.width,
+          child: TransitMap(controller: mapCompleter, onStopTapped: selectStopInSearch,),
+        )
+      ),
+      BottomUpPanel(stop: selectedStop, panelController: _panelController, onHeightChanged: setParallax,),
     ];
     if (searching) {
       if(searchedStops == null) searchedStops = currentFavourites;
@@ -69,6 +76,12 @@ class HomeState extends State<Home> {
     );
   }
 
+  void setParallax(double value) {
+    setState(() {
+      parallax = -value * (MediaQuery.of(context).size.height - 120 - 120) * 0.5;
+    });
+  }
+
   void startSearching() => setState(() => searching = true);
 
   void closeFavsOnSelect(Stop stop) {
@@ -79,6 +92,7 @@ class HomeState extends State<Home> {
   void selectStopInSearch(Stop stop) {
     clearSearchToString(stop.toString());
     moveMapCameraTo(stop.latLng.latitude, stop.latLng.longitude);
+    _panelController.setPanelPosition(0.6);
     setState(() {
       selectedStop = stop;
     });
