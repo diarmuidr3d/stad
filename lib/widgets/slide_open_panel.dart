@@ -121,6 +121,7 @@ class SlidingUpPanel extends StatefulWidget {
   final SlideDirection slideDirection;
 
   final double initialHeight;
+  final Function onHeightChanged;
 
   SlidingUpPanel({
     Key key,
@@ -155,6 +156,7 @@ class SlidingUpPanel extends StatefulWidget {
     this.isDraggable = true,
     this.slideDirection = SlideDirection.UP,
     this.initialHeight = 0.0,
+    this.onHeightChanged,
   }) : assert(0 <= backdropOpacity && backdropOpacity <= 1.0),
         super(key: key);
 
@@ -178,6 +180,7 @@ class _SlidingUpPanelState extends State<SlidingUpPanel> with SingleTickerProvid
       value: widget.initialHeight
     )..addListener((){
       setState((){});
+      widget.onHeightChanged(_ac.value);
 
       if(widget.onPanelSlide != null) widget.onPanelSlide(_ac.value);
 
@@ -206,8 +209,6 @@ class _SlidingUpPanelState extends State<SlidingUpPanel> with SingleTickerProvid
     return Stack(
       alignment: widget.slideDirection == SlideDirection.UP ? Alignment.bottomCenter : Alignment.topCenter,
       children: <Widget>[
-
-
         //make the back widget take up the entire back side
         widget.body != null ? Positioned(
           top: widget.parallaxEnabled ? _getParallax() : 0.0,
@@ -217,24 +218,6 @@ class _SlidingUpPanelState extends State<SlidingUpPanel> with SingleTickerProvid
             child: widget.body,
           ),
         ) : Container(),
-
-
-        //the backdrop to overlay on the body
-        !widget.backdropEnabled ? Container() : GestureDetector(
-          onTap: widget.backdropTapClosesPanel ? _close : null,
-          child: Opacity(
-            opacity: _ac.value * widget.backdropOpacity,
-            child: Container(
-              height: MediaQuery.of(context).size.height,
-              width: MediaQuery.of(context).size.width,
-
-              //set color to null so that touch events pass through
-              //to the body when the panel is closed, otherwise,
-              //if a color exists, then touch events won't go through
-              color: _ac.value == 0.0 ? null : widget.backdropColor,
-            ),
-          ),
-        ),
 
 
         //the actual sliding part

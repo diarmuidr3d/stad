@@ -8,8 +8,14 @@ import 'package:stad/widgets/slide_open_panel.dart';
 
 class BottomUpPanel extends StatefulWidget {
   final Stop stop;
+  final PanelController panelController;
+  final Function onHeightChanged;
 
-  const BottomUpPanel({Key key, @required this.stop}) : super(key: key);
+  const BottomUpPanel({
+    Key key,
+    @required this.stop,
+    this.panelController, this.onHeightChanged
+  }) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => BottomUpPanelState();
@@ -31,6 +37,7 @@ class BottomUpPanelState extends State<BottomUpPanel> {
     }
     var initialHeight = 0.0;
     if(widget.stop != null) initialHeight = 0.6;
+    print(initialHeight);
     return
       SlidingUpPanel(
         color: Colors.transparent,
@@ -39,11 +46,13 @@ class BottomUpPanelState extends State<BottomUpPanel> {
         initialHeight: initialHeight,
         parallaxEnabled: true,
         parallaxOffset: 0.5,
+        controller: widget.panelController,
+        onHeightChanged: widget.onHeightChanged,
         panel: Container(
           decoration: BoxDecoration(
             border: Border.all(color: Styles.appPurple),
             color: Colors.white,
-            borderRadius: BorderRadius.all(Radius.circular(30.0)),
+            borderRadius: BorderRadius.only(topLeft: Radius.circular(30.0), topRight: Radius.circular(30.0), ),
           ),
           child: Column(children: <Widget>[
             BottomPanelTopBar(),
