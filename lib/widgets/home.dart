@@ -2,8 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:stad/widgets/bottom_up_panel.dart';
-
 
 import 'package:stad/keys.dart';
 import 'package:stad/models.dart';
@@ -12,6 +10,8 @@ import 'package:stad/widgets/fav_drawer.dart';
 import 'package:stad/widgets/search_app_bar.dart';
 import 'package:stad/widgets/search_stops.dart';
 import 'package:stad/widgets/slide_open_panel.dart';
+import 'package:stad/widgets/map.dart';
+import 'package:stad/widgets/bottom_up_panel.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -25,7 +25,7 @@ class HomeState extends State<Home> {
   Stop selectedStop;
   final TextEditingController searchFieldController = TextEditingController();
   final PanelController _panelController = PanelController();
-  final mapCompleter = Completer<GoogleMapController>();
+  var mapCompleter = Completer<GoogleMapController>();
 
   @override
   void initState() {
@@ -36,7 +36,18 @@ class HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    var body = <Widget>[getBody()];
+//    var body = <Widget>[getBody()];
+    var body = <Widget>[
+      TransitMap(controller: mapCompleter, onStopTapped: selectStopInSearch,),
+      BottomUpPanel(stop: selectedStop,),
+    ];
+    if (searching) {
+      if(searchedStops == null) searchedStops = currentFavourites;
+      body.add(Container(
+          child: SearchStops(stops: searchedStops, stopTapCallback: selectStopInSearch,),
+          decoration: BoxDecoration(color: Colors.white,)
+      ));
+    }
     body.add(Positioned(
         top: 0.0,
         left: 0.0,
@@ -56,18 +67,6 @@ class HomeState extends State<Home> {
       drawer: FavDrawer(favourites: currentFavourites, onStopTap: closeFavsOnSelect,),
       body: Stack(children: body, )
     );
-  }
-
-  Widget getBody() {
-    if (searching) {
-      if(searchedStops == null) searchedStops = currentFavourites;
-      return SearchStops(stops: searchedStops, stopTapCallback: selectStopInSearch,);
-    }
-    else {
-      return Container(
-        child: BottomUpPanel(stop: selectedStop, mapCompleter: mapCompleter, stopTapCallback: selectStopInSearch,),
-      );
-    }
   }
 
   void startSearching() => setState(() => searching = true);

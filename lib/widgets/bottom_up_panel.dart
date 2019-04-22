@@ -1,20 +1,15 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+
 import 'package:stad/models.dart';
 import 'package:stad/styles.dart';
 import 'package:stad/utilities.dart';
-import 'package:stad/widgets/map.dart';
 import 'package:stad/widgets/real_time_list.dart';
 import 'package:stad/widgets/slide_open_panel.dart';
 
 class BottomUpPanel extends StatefulWidget {
   final Stop stop;
-  final Completer<GoogleMapController> mapCompleter;
-  final Function stopTapCallback;
 
-  const BottomUpPanel({Key key, @required this.stop, this.mapCompleter, this.stopTapCallback}) : super(key: key);
+  const BottomUpPanel({Key key, @required this.stop}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => BottomUpPanelState();
@@ -54,9 +49,6 @@ class BottomUpPanelState extends State<BottomUpPanel> {
             BottomPanelTopBar(),
             Expanded(child: RealTimeList(loading: loading, stopData: stopData,)),
         ])),
-        body: Container(
-          child: TransitMap(controller: widget.mapCompleter, onStopTapped: widget.stopTapCallback,),
-        ),
       );
   }
 

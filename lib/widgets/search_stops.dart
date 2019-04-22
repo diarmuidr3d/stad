@@ -13,7 +13,6 @@ class SearchStops extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print("build search");
     return ListView.builder(
       itemCount: stops.length * 2 + 1,
       itemBuilder: (context, index) {

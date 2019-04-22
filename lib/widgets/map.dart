@@ -128,5 +128,3 @@ class TransitMapState extends State<TransitMap> {
 
   }
 }
-
-
