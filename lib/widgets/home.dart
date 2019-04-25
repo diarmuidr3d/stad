@@ -71,7 +71,7 @@ class HomeState extends State<Home> {
 
     return Scaffold(
       key: Keys.scaffoldKey,
-      drawer: FavDrawer(favourites: currentFavourites, onStopTap: closeFavsOnSelect,),
+      drawer: FavDrawer(onStopTap: closeFavsOnSelect,),
       body: Stack(children: body, )
     );
   }

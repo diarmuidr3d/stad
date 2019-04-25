@@ -84,7 +84,6 @@ class DublinBusAPI implements RealTimeAPI {
 
   Future<List<StopVisited>> searchForBus(int left, int right, List<StopVisited> stopList, String journeyRef, Function callback) async {
     int curr = ((left + right) / 2).floor();
-    print("Start: L $left, R $right, C $curr");
     final stop = stopList[curr];
     bool isDue = await stopHasJourneyDue(stop.stopCode, journeyRef);
     StopState state;
@@ -97,7 +96,6 @@ class DublinBusAPI implements RealTimeAPI {
       state = StopState.VISITED;
       callback(0, curr, state);
     }
-    print("   End: L $left, R $right, Due $isDue, State $state");
     if (left > right) return stopList;
     return searchForBus(left, right, stopList, journeyRef, callback);
   }
@@ -276,6 +274,7 @@ class Favourites {
 
   static final Favourites _singleton = Favourites._internal();
   Future<SharedPreferences> prefs = SharedPreferences.getInstance();
+  List<Function> favouriteUpDateListeners = [];
 
 
   factory Favourites() {
@@ -301,6 +300,7 @@ class Favourites {
       currentFavs = [stopCode];
     }
     myPrefs.setStringList(Keys.favouriteStations, currentFavs);
+    _updateListeners(currentFavs);
     return currentFavs;
   }
 
@@ -310,12 +310,17 @@ class Favourites {
     if (currentFavs != null) {
         currentFavs.remove(stopCode);
         myPrefs.setStringList(Keys.favouriteStations, currentFavs);
+        _updateListeners(currentFavs);
     }
     return currentFavs;
   }
 
   Future<bool> isFavourite(String stopCode) async {
     var currentFavs = await getFavourites();
-    return currentFavs.contains(stopCode);
+    return currentFavs != null && currentFavs.contains(stopCode);
+  }
+
+  void _updateListeners(currentFavs) {
+    for (var listener in favouriteUpDateListeners) listener(currentFavs);
   }
 }

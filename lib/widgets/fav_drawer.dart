@@ -3,13 +3,25 @@ import 'package:stad/models.dart';
 import 'package:stad/resources/strings.dart';
 import 'package:stad/styles.dart';
 import 'package:stad/utilities.dart';
-import 'package:stad/widgets/real_time_list.dart';
 
-class FavDrawer extends StatelessWidget {
-  final favourites;
+class FavDrawer extends StatefulWidget {
   final onStopTap;
 
-  FavDrawer({this.favourites, this.onStopTap});
+  FavDrawer({this.onStopTap});
+
+  @override
+  State<StatefulWidget> createState() => FavDrawerState();
+}
+
+class FavDrawerState extends State<FavDrawer> {
+  List<String> favourites;
+
+  @override
+  void initState() {
+    super.initState();
+    Favourites().getFavourites().then(_setFavs);
+    Favourites().favouriteUpDateListeners.add(_setFavs);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,11 +35,13 @@ class FavDrawer extends StatelessWidget {
           else if (i == 1) return Divider();
           else {
             i = i-2;
-            return FavListTile(stopCode: favourites[i], onTap: onStopTap);
+            return FavListTile(stopCode: favourites[i], onTap: widget.onStopTap);
           }
         },);
     return Drawer(child: child);
   }
+
+  void _setFavs(favs) => setState(() => favourites = favs);
 
 }
 
@@ -47,6 +61,7 @@ class FavListTileState extends State<FavListTile> {
 
   Future<Stop> stopFuture;
   Stop stop;
+  bool isFavourite = true;
 
   @override
   Widget build(BuildContext context) {
@@ -60,25 +75,31 @@ class FavListTileState extends State<FavListTile> {
     if(stop == null) {
       return ListTile(
         leading: Text(widget.stopCode, style: Styles.routeNumberStyle,),
-        onTap: () async => stopFuture.then((stop) {widget.onTap(stop);}),
+        onTap: () async => stopFuture.then((stop) => widget.onTap(stop)),
+        trailing: getFavIcon(),
       );
     } else {
       return ListTile(
         leading: Text(stop.stopCode, style: Styles.routeNumberStyle,),
         title: Text(stop.address),
-        onTap: () {  widget.onTap(stop); },
-//        onTap: () {  _openRealTime(stop); },
+        trailing: getFavIcon(),
+        onTap: () => widget.onTap(stop),
       );
     }
   }
 
-  void _openRealTime(Stop stop) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (BuildContext context) {
-          return RealTimePage(stop: stop,);
-        },
-      ),
+  IconButton getFavIcon() {
+    return IconButton(
+        icon: isFavourite ? Icon(Icons.favorite, color: Colors.red,) : Icon(Icons.favorite_border,),
+        onPressed: () {
+          if (!isFavourite) {
+            Favourites().addFavourite(widget.stopCode);
+            setState(() => isFavourite = true);
+          } else {
+            Favourites().removeFavourite(widget.stopCode);
+            setState(() => isFavourite = false);
+          }
+        }
     );
   }
 }

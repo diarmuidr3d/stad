@@ -24,10 +24,15 @@ class BottomUpPanel extends StatefulWidget {
 class BottomUpPanelState extends State<BottomUpPanel> {
   RealTimeStopData stopData;
   bool loading = true;
+  bool isFavourite;
 
   @override
   Widget build(BuildContext context) {
     if((stopData == null || widget.stop != stopData.stop) && widget.stop != null ) {
+      isFavourite = false;
+      loading = true;
+      stopData = RealTimeStopData(stop: widget.stop);
+      Favourites().isFavourite(widget.stop.stopCode).then((isFav) => setState(() => isFavourite = isFav));
       RealTimeUtilities.getStopTimings(widget.stop).then((stopData) {
         setState(() {
           this.stopData = stopData;
@@ -37,7 +42,6 @@ class BottomUpPanelState extends State<BottomUpPanel> {
     }
     var initialHeight = 0.0;
     if(widget.stop != null) initialHeight = 0.6;
-    print(initialHeight);
     return
       SlidingUpPanel(
         color: Colors.transparent,
@@ -54,16 +58,43 @@ class BottomUpPanelState extends State<BottomUpPanel> {
             color: Colors.white,
             borderRadius: BorderRadius.only(topLeft: Radius.circular(30.0), topRight: Radius.circular(30.0), ),
           ),
-          child: Column(children: <Widget>[
-            BottomPanelTopBar(),
-            Expanded(child: RealTimeList(loading: loading, stopData: stopData,)),
-        ])),
+          child: Column(children: getBody())),
       );
+  }
+
+  List<Widget> getBody() {
+    var body = <Widget>[DragBar()];
+    if(widget.stop != null) {
+      body.addAll(<Widget>[
+        Row(children: <Widget>[
+          Text("  " + widget.stop.stopCode, style: Styles.routeNumberStyle,),
+          Text(" - ${widget.stop.address}", style: Styles.biggerFont,),
+          getFavIcon(),
+        ]),
+        Expanded(child: RealTimeList(loading: loading, stopData: stopData,)),
+      ]);
+    }
+    return body;
+  }
+
+  IconButton getFavIcon() {
+    return IconButton(
+        icon: isFavourite != null && isFavourite ? Icon(Icons.favorite, color: Colors.red,) : Icon(Icons.favorite_border,),
+        onPressed: () {
+          if (isFavourite == null || !isFavourite) {
+            Favourites().addFavourite(stopData.stop.stopCode);
+            setState(() => isFavourite = true);
+          } else {
+            Favourites().removeFavourite(stopData.stop.stopCode);
+            setState(() => isFavourite = false);
+          }
+        }
+    );
   }
 
 }
 
-class BottomPanelTopBar extends StatelessWidget {
+class DragBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
