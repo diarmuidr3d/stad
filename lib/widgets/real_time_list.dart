@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:stad/models.dart';
+import 'package:stad/resources/strings.dart';
 import 'package:stad/styles.dart';
 import 'package:stad/utilities.dart';
 import 'package:stad/widgets/journey_details.dart';
@@ -22,7 +23,7 @@ class RealTimeList extends StatelessWidget {
       child: loading
           ? Center(child: CircularProgressIndicator())
           : stopData.timings == null || stopData.timings.isEmpty
-            ? Text("No results found for this stop 😭")
+            ? Text(Strings.noResults)
             : ListView.builder(
                 padding: const EdgeInsets.all(16.0),
                 itemCount: stopData.timings.length,
@@ -69,9 +70,9 @@ class IarnrodItem extends RealTimeItem {
         timing.heading,
       ),
       trailing: Text(
-        timing.dueMins.toString(),
-        style: Styles.biggerFont,
-      ),
+          timing.dueMins.toString() + " " + Strings.shortenedMinutes,
+          style: Styles.biggerFont,
+        ),
 //      onTap: () {_openFinder();},
     );
   }
@@ -110,7 +111,7 @@ class DublinBusItem extends RealTimeItem {
         timing.heading,
       ),
       trailing: Text(
-        timing.dueMins.toString(),
+        timing.dueMins.toString() + " " + Strings.shortenedMinutes,
         style: Styles.biggerFont,
       ),
 //      onTap: () {_openFinder();},
