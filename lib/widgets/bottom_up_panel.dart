@@ -69,8 +69,8 @@ class BottomUpPanelState extends State<BottomUpPanel> {
                 Text(" - ${widget.stop.address}", style: Styles.biggerFont,),
               ],),
               Row(children: <Widget>[
-                getFavIcon(),
                 IconButton(icon: Icon(Icons.refresh), onPressed: getTimings,),
+                getFavIcon(),
               ],)
         ]),
         Expanded(child: RealTimeList(loading: loading, stopData: stopData,)),

@@ -5,6 +5,7 @@ import 'package:stad/models.dart';
 import 'package:stad/resources/strings.dart';
 import 'package:stad/styles.dart';
 import 'package:stad/utilities.dart';
+import 'package:stad/utilities/database.dart';
 import 'package:stad/widgets/journey_details.dart';
 import 'package:stad/keys.dart';
 

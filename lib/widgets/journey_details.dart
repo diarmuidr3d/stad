@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:stad/keys.dart';
 import 'package:stad/models.dart';
 import 'package:stad/utilities.dart';
+import 'package:stad/utilities/database.dart';
 
 class JourneyDetails extends StatefulWidget {
   final Timing timing;
