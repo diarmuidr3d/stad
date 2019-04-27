@@ -1,5 +1,6 @@
 import 'dart:core';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -94,6 +95,18 @@ class RouteDB {
     }
   }
 
+  Future<List<Stop>> getNearbyStopsOrderedByDistance(LatLng latLng) async {
+
+    double getDistance(LatLng a, LatLng b) {
+      return sqrt(pow(a.latitude - b.latitude, 2) + pow(a.longitude - b.longitude, 2));
+    }
+
+    var stopMap =  await getNearbyStops(latLng);
+    var stops = stopMap.map((i) => Stop.fromMap(i)).toList();
+    stops.sort((stopA, stopB) => getDistance(latLng, stopA.latLng).compareTo(getDistance(latLng, stopB.latLng)));
+    return stops;
+  }
+
 
 
   Future<List<Map<String, dynamic>>> getNearbyStops(LatLng latLng) async {
@@ -101,12 +114,12 @@ class RouteDB {
     Database db = await databaseFuture;
     var lat = latLng.latitude.toString();
     var lng = latLng.longitude.toString();
-    return db.rawQuery('SELECT stops.stop_code AS stop_code, longitude, latitude, address, stop_served_by_operator.operator AS operator FROM stops ' +
-        ' INNER JOIN stop_served_by_operator ON stops.stop_code = stop_served_by_operator.stop_code ' +
-        ' WHERE (latitude - "' + lat + '") < ' + stopLoadRange +
-        '  AND (latitude - "' + lat + '") > -' + stopLoadRange +
-        '  AND (longitude - "' + lng + '") < ' + stopLoadRange +
-        '  AND (longitude - "' + lng + '") > -' + stopLoadRange
+    return db.rawQuery("""SELECT stops.stop_code AS stop_code, longitude, latitude, address, stop_served_by_operator.operator AS operator FROM stops
+        INNER JOIN stop_served_by_operator ON stops.stop_code = stop_served_by_operator.stop_code
+        WHERE (latitude - "$lat") < $stopLoadRange
+          AND (latitude - "$lat") > -$stopLoadRange
+          AND (longitude - "$lng") < $stopLoadRange
+          AND (longitude - "$lng") > -$stopLoadRange ; """
     );
   }
 

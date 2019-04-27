@@ -47,7 +47,7 @@ class HomeState extends State<Home> {
           child: TransitMap(controller: mapCompleter, onStopTapped: selectStopInSearch,),
         )
       ),
-      BottomUpPanel(stop: selectedStop, panelController: _panelController, onHeightChanged: setParallax,),
+      BottomUpPanel(stop: selectedStop, panelController: _panelController, onHeightChanged: setParallax, onNearbyStopSelected: selectStopInSearch,),
     ];
     if (searching) {
       if(searchedStops == null) searchedStops = currentFavourites;

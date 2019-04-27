@@ -46,6 +46,14 @@ class Stop {
   });
 
   String toString() => stopCode + " - " + address;
+
+  static Stop fromMap(Map<String, dynamic> map) {
+    return Stop(
+      stopCode: map["stop_code"],
+      address: map["address"],
+      latLng: LatLng(double.parse(map["latitude"]), double.parse(map["longitude"])),
+    );
+  }
 }
 
 enum StopState {UNKNOWN, UNVISITED, VISITING, VISITED, LOADING}
