@@ -31,7 +31,6 @@ class BottomUpPanelState extends State<BottomUpPanel> {
   bool loading = true;
   bool isFavourite;
   List<Stop> nearbyStops;
-  LatLng nearbyStopsForLocation;
 
   @override
   Widget build(BuildContext context) {
@@ -41,15 +40,13 @@ class BottomUpPanelState extends State<BottomUpPanel> {
       stopData = RealTimeStopData(stop: widget.stop);
       Favourites().isFavourite(widget.stop.stopCode).then((isFav) => setState(() => isFavourite = isFav));
       getTimings();
-    } else if (widget.stop == null) {
+    } else if (widget.stop == null && nearbyStops == null) {
       var location = new Location();
       location.getLocation().then((loc) {
-        if(nearbyStopsForLocation == null || nearbyStopsForLocation.longitude != loc.longitude || nearbyStopsForLocation.latitude != loc.latitude) {
-          nearbyStopsForLocation = LatLng(loc.latitude, loc.longitude);
-          RouteDB().getNearbyStopsOrderedByDistance(nearbyStopsForLocation).then((list) {
+          print("nearby stops for location");
+          RouteDB().getNearbyStopsOrderedByDistance(LatLng(loc.latitude, loc.longitude)).then((list) {
             setState(() => nearbyStops = list);
           });
-        }
       });
     }
     var initialHeight = 0.0;

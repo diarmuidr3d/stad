@@ -75,12 +75,16 @@ class TransitMapState extends State<TransitMap> {
       myLocationEnabled: true,
       compassEnabled: true,
       markers: markers,
-      onCameraMove: _updateMarkers,
+      onCameraMove: (CameraPosition p) => currentPosition = p,
+      onCameraIdle: () => _updateMarkers(currentPosition),
     );
   }
 
+  DateTime getNearbyStopsLastCalled;
+
   void _updateMarkers(CameraPosition p) {
-    if (p.zoom > minimumZoom) {
+    if (p.zoom > minimumZoom && (getNearbyStopsLastCalled == null || DateTime.now().difference(getNearbyStopsLastCalled).inMilliseconds > 20)) {
+      getNearbyStopsLastCalled = DateTime.now();
       db.getNearbyStops(p.target).then((stops) {
           var markerMapList = stops.map((stop) {
             return Marker(
