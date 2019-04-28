@@ -115,9 +115,7 @@ class RouteDB {
           AND (longitude - "$lng") > -$stopLoadRange 
           LIMIT 50; """
     );
-    var stops = <Stop>[];
-    for(var stopMap in result) stops.add(await Stop.fromMap(stopMap));
-    return stops;
+    return result.map((stopMap) => Stop.fromMap(stopMap));
   }
 
 

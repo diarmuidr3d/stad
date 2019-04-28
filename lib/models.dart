@@ -57,7 +57,7 @@ class Stop {
 
   String toString() => stopCode + " - " + address;
 
-  static Future<Stop> fromMap(Map<String, dynamic> map) async {
+  static Stop fromMap(Map<String, dynamic> map) {
     return Stop(
       stopCode: map["stop_code"],
       address: map["address"],
