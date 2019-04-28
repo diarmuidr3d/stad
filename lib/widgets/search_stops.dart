@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:stad/models.dart';
 import 'package:stad/styles.dart';
 import 'package:stad/utilities.dart';
-import 'package:stad/utilities/database.dart';
 import 'package:stad/widgets/fav_drawer.dart';
 
 class SearchStops extends StatelessWidget {

@@ -5,8 +5,6 @@ import 'package:stad/models.dart';
 import 'package:stad/resources/strings.dart';
 import 'package:stad/styles.dart';
 import 'package:stad/utilities.dart';
-import 'package:stad/utilities/database.dart';
-import 'package:stad/widgets/journey_details.dart';
 import 'package:stad/keys.dart';
 
 class RealTimeList extends StatelessWidget {
@@ -76,22 +74,6 @@ class IarnrodItem extends RealTimeItem {
           timing.dueMins.toString() + " " + Strings.shortenedMinutes,
           style: Styles.biggerFont,
         ),
-//      onTap: () {_openFinder();},
-    );
-  }
-
-  void _openFinder() {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (BuildContext context) {
-          return Scaffold(
-            appBar: AppBar(
-              title: const Text('Location of the train'),
-            ),
-            body: JourneyDetails(timing, stop.stopCode, RouteDB()),
-          );
-        },
-      ),
     );
   }
 }
@@ -118,21 +100,6 @@ class DublinBusItem extends RealTimeItem {
         style: Styles.biggerFont,
       ),
 //      onTap: () {_openFinder();},
-    );
-  }
-
-  void _openFinder() {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (BuildContext context) {
-          return Scaffold(
-            appBar: AppBar(
-              title: const Text('Location of the bus'),
-            ),
-            body: JourneyDetails(timing, stop.stopCode, RouteDB()),
-          );
-        },
-      ),
     );
   }
 }
