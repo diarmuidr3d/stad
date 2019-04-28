@@ -1,5 +1,4 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:stad/utilities/database.dart';
 
 enum Operator {DublinBus, IarnrodEireann, BusEireann, Luas}
 
@@ -46,28 +45,26 @@ class Stop {
   String address;
   LatLng latLng;
   String apiStopCode;
-  List<Operator> operators;
+  Operator operator;
   List<RouteDirection> servedBy = [];
   Stop({
     this.stopCode,
     this.apiStopCode,
     this.address,
     this.latLng,
-    this.operators
+    this.operator
   });
 
   String toString() => stopCode + " - " + address;
 
   static Future<Stop> fromMap(Map<String, dynamic> map) async {
-    var stop = Stop(
+    return Stop(
       stopCode: map["stop_code"],
       address: map["address"],
       apiStopCode: map["api_stop_code"],
       latLng: LatLng(double.parse(map["latitude"]), double.parse(map["longitude"])),
+      operator: allOperators[map["operator"]]
     );
-    if (map.containsKey("operators")) stop.operators = operatorsFromStringList(map["operators"]);
-    else stop.operators = operatorsFromStringList(await RouteDB().getOperatorsForStop(stop.stopCode));
-    return stop;
   }
 }
 

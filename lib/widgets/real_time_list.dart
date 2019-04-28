@@ -52,7 +52,7 @@ class RealTimeItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if(stop.operators.contains(Operator.IarnrodEireann) || stop.operators.contains(Operator.Luas)) return IarnrodItem(timing: timing, context: context, stop: stop);
+    if(stop.operator == Operator.IarnrodEireann || stop.operator == Operator.Luas) return IarnrodItem(timing: timing, context: context, stop: stop);
 //    else if(stop.operators.contains(Operator.DublinBus)) return DublinBusItem(timing: timing, context: context, stop: stop);
     else return DublinBusItem(timing: timing, context: context, stop: stop);
 //    TODO: Add Bus Eireann / Luas specifics here as necessary

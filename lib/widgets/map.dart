@@ -85,7 +85,7 @@ class TransitMapState extends State<TransitMap> {
           var markerMapList = stops.map((stop) {
             return Marker(
               icon: BitmapDescriptor.defaultMarkerWithHue(
-                  markerColours[stop.operators[0]]),
+                  markerColours[stop.operator]),
               markerId: MarkerId(stop.stopCode),
               position: stop.latLng,
               infoWindow: InfoWindow(title: stop.stopCode,

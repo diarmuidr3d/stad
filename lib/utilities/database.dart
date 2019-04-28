@@ -39,6 +39,7 @@ class RouteDB {
   }
 
   Future<List<Operator>> getOperatorsForStop(String stopCode) async {
+    print("getOperatorsForStop");
     Database db = await databaseFuture;
     final result = await db.rawQuery(
         'SELECT operator FROM `stop_served_by_operator` WHERE ' +
@@ -48,6 +49,7 @@ class RouteDB {
   }
 
   Future<List<Map<String, dynamic>>> getStopsMatchingParm(String searchText) async {
+    print("getStopsMatchingParm");
     RegExp numRegex = new RegExp(r"^\s*(\d)+\s*$");
     if (numRegex.hasMatch(searchText)) {
       return _getStopsMatchingInt(int.parse(searchText.trim()));
@@ -76,23 +78,15 @@ class RouteDB {
   }
 
   Future<Stop> getStopWithStopCode(String stopCode) async {
+    print("getStopWithStopCode");
     Database db = await databaseFuture;
     final result = await db.rawQuery(
         ' SELECT * FROM `stops` ' +
             ' WHERE stop_code = "' + stopCode + '"; '
     );
-    if (result.length > 1) print("Multiple results for stop code: " + stopCode);
-    if (result.length > 0) {
-      final stopMap = result[0];
-      final operators = await getOperatorsForStop(stopCode);
-      return Stop(
-        stopCode: stopCode,
-        address: stopMap["address"],
-        latLng: LatLng(double.parse(stopMap["latitude"]),
-            double.parse(stopMap["longitude"])),
-        operators: operators,
-      );
-    }
+    if (result.length > 1) throw Exception("Multiple results for stop code: " + stopCode);
+    if (result.length > 0) return Stop.fromMap(result[0]);
+    else throw Exception("This stop does not exist: " + stopCode);
   }
 
   Future<List<Stop>> getNearbyStopsOrderedByDistance(LatLng latLng) async {
@@ -107,17 +101,19 @@ class RouteDB {
   }
 
   Future<List<Stop>> getNearbyStops(LatLng latLng) async {
+    print("getNearbyStops");
     final stopLoadRange = "0.006"; // The range for which to load the stop markers
     Database db = await databaseFuture;
     var lat = latLng.latitude.toString();
     var lng = latLng.longitude.toString();
     final result = await db.rawQuery("""
-        SELECT stop_code, longitude, latitude, address, api_stop_code
+        SELECT stop_code, longitude, latitude, address, operator, api_stop_code
         FROM stops
         WHERE (latitude - "$lat") < $stopLoadRange
           AND (latitude - "$lat") > -$stopLoadRange
           AND (longitude - "$lng") < $stopLoadRange
-          AND (longitude - "$lng") > -$stopLoadRange ; """
+          AND (longitude - "$lng") > -$stopLoadRange 
+          LIMIT 50; """
     );
     var stops = <Stop>[];
     for(var stopMap in result) stops.add(await Stop.fromMap(stopMap));
@@ -126,6 +122,7 @@ class RouteDB {
 
 
   Future<List<StopVisited>> getPreviousStops(route, stopCode, inbound) async {
+    print("getPreviousStops");
     Database db = await databaseFuture;
     List<Map<String, dynamic>> results = await db.rawQuery(
         'SELECT B.stop_code AS stopCode, address, latitude, longitude ' +
@@ -141,6 +138,7 @@ class RouteDB {
   }
 
   Future<String> getRouteNumForApiNum(String apiNum) async {
+    print("getRouteNumForApiNum");
     Database db = await databaseFuture;
     List<Map<String, dynamic>> result = await db.rawQuery(
         """SELECT number FROM `routes`

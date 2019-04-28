@@ -31,6 +31,7 @@ class BottomUpPanelState extends State<BottomUpPanel> {
   bool loading = true;
   bool isFavourite;
   List<Stop> nearbyStops;
+  LatLng nearbyStopsForLocation;
 
   @override
   Widget build(BuildContext context) {
@@ -43,10 +44,12 @@ class BottomUpPanelState extends State<BottomUpPanel> {
     } else if (widget.stop == null) {
       var location = new Location();
       location.getLocation().then((loc) {
-        RouteDB().getNearbyStopsOrderedByDistance(LatLng(loc.latitude, loc.longitude)).then((list) {
-          print(list);
-          setState(() => nearbyStops = list);
-        });
+        if(nearbyStopsForLocation == null || nearbyStopsForLocation.longitude != loc.longitude || nearbyStopsForLocation.latitude != loc.latitude) {
+          nearbyStopsForLocation = LatLng(loc.latitude, loc.longitude);
+          RouteDB().getNearbyStopsOrderedByDistance(nearbyStopsForLocation).then((list) {
+            setState(() => nearbyStops = list);
+          });
+        }
       });
     }
     var initialHeight = 0.0;

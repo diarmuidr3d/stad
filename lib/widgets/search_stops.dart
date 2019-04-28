@@ -51,22 +51,9 @@ class StopResultState extends State<StopResult> {
         leading: Text(widget.stop["stop_code"], style: Styles.routeNumberStyle,),
         title: Text(widget.stop["address"]),
         trailing: getFavIcon(),
-        onTap: () => onTapSearchedItem(widget.stop),
+        onTap: () => widget.stopTapCallback(Stop.fromMap(widget.stop)),
       );}
     if (widget.stop is String) return FavListTile(stopCode: widget.stop, onTap: widget.stopTapCallback,);
-  }
-
-  void onTapSearchedItem(Map<String, dynamic> stopMap) {
-    print(stopMap);
-    var stop = Stop(
-      stopCode: stopMap["stop_code"],
-      latLng: LatLng(double.parse(stopMap["latitude"]),
-        double.parse(stopMap["longitude"]),
-      ),
-      address: stopMap["address"],
-    );
-    RouteDB().getOperatorsForStop(stop.stopCode).then((operators) {stop.operators = operators;});
-    widget.stopTapCallback(stop);
   }
 
 

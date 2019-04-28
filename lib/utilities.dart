@@ -202,22 +202,20 @@ class RealTimeUtilities {
   static Future<RealTimeStopData> getStopTimings(Stop stop) async {
     final stopCode = stop.stopCode;
     final stopData = RealTimeStopData(stop: stop);
-    if (stop.operators == null) stop.operators = await RouteDB().getOperatorsForStop(stop.stopCode);
-    if(stop.operators.contains(Operator.DublinBus)) {
-      var dbTimings = await DublinBusAPI().getTimings(stopCode);
-      if (dbTimings != null) stopData.timings.addAll(dbTimings);
-    }
-    if(stop.operators.contains(Operator.IarnrodEireann)) {
-      var ieTimings = await IarnrodEireannAPI().getTimings(stopCode);
-      if (ieTimings != null) stopData.timings.addAll(ieTimings);
-    }
-    if(stop.operators.contains(Operator.BusEireann)) {
-      var beTimings = await BusEireannAPI().getTimings(stop.apiStopCode);
-      if (beTimings != null) stopData.timings.addAll(beTimings);
-    }
-    if(stop.operators.contains(Operator.Luas)) {
-      var luasTimings = await LuasAPI().getTimings(stop.apiStopCode);
-      if (luasTimings != null) stopData.timings.addAll(luasTimings);
+    if (stop.operator == null) throw Exception("No operator for stop ${stop.stopCode}");
+    switch (stop.operator) {
+      case Operator.BusEireann:
+        stopData.timings = await BusEireannAPI().getTimings(stopCode);
+        break;
+      case Operator.DublinBus:
+        stopData.timings = await DublinBusAPI().getTimings(stopCode);
+        break;
+      case Operator.IarnrodEireann:
+        stopData.timings = await IarnrodEireannAPI().getTimings(stopCode);
+        break;
+      case Operator.Luas:
+        stopData.timings = await LuasAPI().getTimings(stopCode);
+        break;
     }
     stopData.timings.sort((a, b) => a.dueMins.compareTo(b.dueMins));
     return stopData;
