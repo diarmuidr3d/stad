@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:core';
+import 'dart:io';
 
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -131,8 +132,12 @@ class IarnrodEireannAPI  implements RealTimeAPI {
 class BusEireannAPI  implements RealTimeAPI {
 
   Future<Map<String, dynamic>> _getRealTimeStopDataTree(String stopCode) async {
-    http.Response response = await http.get('https://buseireann.ie/inc/proto/stopPassageTdi.php?stop_point=$stopCode');
-    return jsonDecode(response.body)["stopPassageTdi"];
+    HttpClient client = new HttpClient();
+    client.badCertificateCallback =((X509Certificate cert, String host, int port) => true);
+    HttpClientRequest request = await client.openUrl("GET", Uri.parse('http://buseireann.ie/inc/proto/stopPassageTdi.php?stop_point=$stopCode'));
+    HttpClientResponse response = await request.close();
+    String reply = await response.transform(utf8.decoder).join();
+    return jsonDecode(reply)["stopPassageTdi"];
   }
 
   @override
@@ -165,6 +170,7 @@ class LuasAPI  implements RealTimeAPI {
 
   Future<ETree> _getRealTimeStopDataTree(String stopCode) async {
     http.Response response = await http.get('http://luasforecasts.rpa.ie/xml/get.ashx?action=forecast&encrypt=false&stop=$stopCode');
+    print(response.body);
     return ETree.fromString(response.body);
   }
 
@@ -172,16 +178,19 @@ class LuasAPI  implements RealTimeAPI {
   Future<List<Timing>> getTimings(String stopCode) async {
     var tree = await _getRealTimeStopDataTree(stopCode);
     final xmlStopData = tree.xpath('/stopInfo/direction/tram');
-    var timings;
+    var timings = <Timing>[];
     if (xmlStopData != null) {
-      timings = xmlStopData.map((element){
-        Timing details = new Timing(
-          heading: element.attributes["destination"],
-          dueMins: int.parse(element.attributes["dueMins"]),
-        );
+      for (var element in xmlStopData) {
+        if(element.attributes["dueMins"] != "") {
+          final dueMins = element.attributes["dueMins"] == "DUE" ? 0 : int.parse(element.attributes["dueMins"]);
+          Timing details = new Timing(
+            heading: element.attributes["destination"],
+            dueMins: dueMins,
+          );
 //        TODO: Figure out how to parse direction, journey, route for luas
-        return details;
-      }).toList();
+          timings.add(details);
+        }
+      };
     }
     return timings;
   }
