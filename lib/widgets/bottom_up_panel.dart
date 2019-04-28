@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
@@ -77,17 +75,14 @@ class BottomUpPanelState extends State<BottomUpPanel> {
     var body = <Widget>[DragBar()];
     if(widget.stop != null) {
       body.addAll(<Widget>[
-        Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Row(children: <Widget>[
-                Text("  " + widget.stop.stopCode, style: Styles.routeNumberStyle,),
-                Text(" - ${widget.stop.address}", style: Styles.biggerFont,),
-              ],),
-              Row(children: <Widget>[
-                IconButton(icon: Icon(Icons.refresh), onPressed: getTimings,),
-                getFavIcon(),
-              ],)
+        Row(children: <Widget>[
+          SizedBox(width: 10.0,),
+          Text(widget.stop.stopCode, style: Styles.routeNumberStyle,),
+          Expanded(child:
+            Text(" - ${widget.stop.address}", style: Styles.biggerFont, overflow: TextOverflow.ellipsis, maxLines: 1,),
+          ),
+          IconButton(icon: Icon(Icons.refresh), onPressed: getTimings,),
+          getFavIcon(),
         ]),
         Expanded(child: RealTimeList(loading: loading, stopData: stopData,)),
       ]);
