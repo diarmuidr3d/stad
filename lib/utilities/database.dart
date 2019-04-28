@@ -44,7 +44,7 @@ class RouteDB {
         'SELECT operator FROM `stop_served_by_operator` WHERE ' +
             '  stop_code = "' + stopCode + '" ;'
     );
-    return result.map((map) => operators[map["operator"]]).toList();
+    return result.map((map) => allOperators[map["operator"]]).toList();
   }
 
   Future<List<Map<String, dynamic>>> getStopsMatchingParm(String searchText) async {
@@ -101,26 +101,27 @@ class RouteDB {
       return sqrt(pow(a.latitude - b.latitude, 2) + pow(a.longitude - b.longitude, 2));
     }
 
-    var stopMap =  await getNearbyStops(latLng);
-    var stops = stopMap.map((i) => Stop.fromMap(i)).toList();
+    var stops =  await getNearbyStops(latLng);
     stops.sort((stopA, stopB) => getDistance(latLng, stopA.latLng).compareTo(getDistance(latLng, stopB.latLng)));
     return stops;
   }
 
-
-
-  Future<List<Map<String, dynamic>>> getNearbyStops(LatLng latLng) async {
+  Future<List<Stop>> getNearbyStops(LatLng latLng) async {
     final stopLoadRange = "0.006"; // The range for which to load the stop markers
     Database db = await databaseFuture;
     var lat = latLng.latitude.toString();
     var lng = latLng.longitude.toString();
-    return db.rawQuery("""SELECT stops.stop_code AS stop_code, longitude, latitude, address, stop_served_by_operator.operator AS operator FROM stops
-        INNER JOIN stop_served_by_operator ON stops.stop_code = stop_served_by_operator.stop_code
+    final result = await db.rawQuery("""
+        SELECT stop_code, longitude, latitude, address, api_stop_code
+        FROM stops
         WHERE (latitude - "$lat") < $stopLoadRange
           AND (latitude - "$lat") > -$stopLoadRange
           AND (longitude - "$lng") < $stopLoadRange
           AND (longitude - "$lng") > -$stopLoadRange ; """
     );
+    var stops = <Stop>[];
+    for(var stopMap in result) stops.add(await Stop.fromMap(stopMap));
+    return stops;
   }
 
 
@@ -137,5 +138,18 @@ class RouteDB {
     return results.map((obj) {
       return StopVisited(obj["stopCode"], obj["address"], LatLng(double.parse(obj["latitude"]), double.parse(obj["longitude"])));
     }).toList();
+  }
+
+  Future<String> getRouteNumForApiNum(String apiNum) async {
+    Database db = await databaseFuture;
+    List<Map<String, dynamic>> result = await db.rawQuery(
+        """SELECT number FROM `routes`
+           WHERE api_route_number = "$apiNum"; """
+    );
+    if (result.length > 1) print("Multiple results for route code: " + apiNum);
+    if (result.length > 0) {
+      return result[0]["number"];
+    }
+    else throw Exception("$apiNum has no corresponding Route Number");
   }
 }

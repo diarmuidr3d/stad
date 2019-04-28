@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:core';
 
 import 'package:http/http.dart' as http;
@@ -9,14 +10,13 @@ import 'package:stad/models.dart';
 import 'package:stad/utilities/database.dart';
 
 abstract class RealTimeAPI {
-  Future<ETree> getRealTimeStopDataTree(String stopCode);
 
   Future<List<Timing>> getTimings(String stopCode);
 }
 
 class DublinBusAPI implements RealTimeAPI {
 
-  Future<ETree> getRealTimeStopDataTree(String stopCode) async {
+  Future<ETree> _getRealTimeStopDataTree(String stopCode) async {
     var envelope =
     '''<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
     <soap:Body>
@@ -43,7 +43,7 @@ class DublinBusAPI implements RealTimeAPI {
 
   @override
   Future<List<Timing>> getTimings(String stopCode) async {
-    var tree = await getRealTimeStopDataTree(stopCode);
+    var tree = await _getRealTimeStopDataTree(stopCode);
     final xmlStopData = tree.xpath('/soap/soap/GetRealTimeStopDataResponse/GetRealTimeStopDataResult/diffgr/DocumentElement/StopData');
     var timings;
     if (xmlStopData != null) {
@@ -66,7 +66,7 @@ class DublinBusAPI implements RealTimeAPI {
   }
 
   Future<bool> stopHasJourneyDue(String stopCode, String journeyRef) async {
-    final tree = await getRealTimeStopDataTree(stopCode);
+    final tree = await _getRealTimeStopDataTree(stopCode);
     final xmlStopData = tree.xpath('/soap/soap/GetRealTimeStopDataResponse/GetRealTimeStopDataResult/diffgr/DocumentElement/StopData/MonitoredVehicleJourney_VehicleRef/text()');
     if (xmlStopData != null) {
       for (final element in xmlStopData) {
@@ -100,7 +100,7 @@ class DublinBusAPI implements RealTimeAPI {
 
 class IarnrodEireannAPI  implements RealTimeAPI {
   
-  Future<ETree> getRealTimeStopDataTree(String stopCode) async {
+  Future<ETree> _getRealTimeStopDataTree(String stopCode) async {
     http.Response response = await http.get('http://api.irishrail.ie/realtime/realtime.asmx/getStationDataByCodeXML?StationCode=$stopCode');
     final respBody = response.body.substring(response.body.indexOf('>') + 1); // Removes the xml artifact from the start of the response so it can be parsed
     return ETree.fromString(respBody);
@@ -108,7 +108,7 @@ class IarnrodEireannAPI  implements RealTimeAPI {
 
   @override
   Future<List<Timing>> getTimings(String stopCode) async {
-    var tree = await getRealTimeStopDataTree(stopCode);
+    var tree = await _getRealTimeStopDataTree(stopCode);
     final xmlStopData = tree.xpath('/ArrayOfObjStationData/objStationData');
     var timings;
     if (xmlStopData != null) {
@@ -128,6 +128,66 @@ class IarnrodEireannAPI  implements RealTimeAPI {
 
 }
 
+class BusEireannAPI  implements RealTimeAPI {
+
+  Future<Map<String, dynamic>> _getRealTimeStopDataTree(String stopCode) async {
+    http.Response response = await http.get('https://buseireann.ie/inc/proto/stopPassageTdi.php?stop_point=$stopCode');
+    return jsonDecode(response.body)["stopPassageTdi"];
+  }
+
+  @override
+  Future<List<Timing>> getTimings(String stopCode) async {
+    var stopMap = await _getRealTimeStopDataTree(stopCode);
+    var timings = <Timing>[];
+    for (var v in stopMap.values) {
+      if (v != 0 && v["departure_data"] != null) {
+        final departureData = v["departure_data"];
+        if (departureData == null) break; // TODO: handle arrivals
+        final routeNum = await RouteDB().getRouteNumForApiNum(
+            v["route_duid"]["duid"]);
+        final dueIn = DateTime.fromMillisecondsSinceEpoch(departureData["scheduled_passage_time_utc"] * 1000)
+            .difference(DateTime.now()).inMinutes;
+        if (dueIn > 0)
+          timings.add(Timing(
+            dueMins: dueIn,
+            heading: departureData["multilingual_direction_text"]["defaultValue"],
+            journeyReference: v["trip_duid"]["duid"],
+            route: routeNum,
+          ));
+      }
+    }
+    return timings;
+  }
+
+}
+
+class LuasAPI  implements RealTimeAPI {
+
+  Future<ETree> _getRealTimeStopDataTree(String stopCode) async {
+    http.Response response = await http.get('http://luasforecasts.rpa.ie/xml/get.ashx?action=forecast&encrypt=false&stop=$stopCode');
+    return ETree.fromString(response);
+  }
+
+  @override
+  Future<List<Timing>> getTimings(String stopCode) async {
+    var tree = await _getRealTimeStopDataTree(stopCode);
+    final xmlStopData = tree.xpath('/stopInfo/direction/tram');
+    var timings;
+    if (xmlStopData != null) {
+      timings = xmlStopData.map((element){
+        Timing details = new Timing(
+          heading: element.attributes["destination"],
+          dueMins: element.attributes["dueMins"],
+        );
+//        TODO: Figure out how to parse direction, journey, route for luas
+        return details;
+      }).toList();
+    }
+    return timings;
+  }
+
+}
+
 class RealTimeUtilities {
 
   static Future<RealTimeStopData> getStopTimings(Stop stop) async {
@@ -139,8 +199,13 @@ class RealTimeUtilities {
       if (dbTimings != null) stopData.timings.addAll(dbTimings);
     }
     if(stop.operators.contains(Operator.IarnrodEireann)) {
-      var dbTimings = await IarnrodEireannAPI().getTimings(stopCode);
-      if (dbTimings != null) stopData.timings.addAll(dbTimings);
+      var ieTimings = await IarnrodEireannAPI().getTimings(stopCode);
+      if (ieTimings != null) stopData.timings.addAll(ieTimings);
+    }
+    if(stop.operators.contains(Operator.BusEireann)) {
+      var beTimings = await BusEireannAPI().getTimings(stop.apiStopCode);
+      print(beTimings);
+      if (beTimings != null) stopData.timings.addAll(beTimings);
     }
     stopData.timings.sort((a, b) => a.dueMins.compareTo(b.dueMins));
     print(stopData.timings);

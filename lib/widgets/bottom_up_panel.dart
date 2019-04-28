@@ -130,7 +130,7 @@ class BottomUpPanelState extends State<BottomUpPanel> {
         this.stopData = stopData;
         loading = false;
       });
-      Timer(Duration(seconds: 30), getTimings);
+//      Timer(Duration(seconds: 30), getTimings);
     });
   }
 

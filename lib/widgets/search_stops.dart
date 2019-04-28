@@ -49,7 +49,7 @@ class StopResultState extends State<StopResult> {
       Favourites().isFavourite(widget.stop["stop_code"]).then((isFav) => setState(() => isFavourite = isFav));
       return ListTile(
         leading: Text(widget.stop["stop_code"], style: Styles.routeNumberStyle,),
-        title: Text(widget.stop["address"] + ", " + widget.stop["location"]),
+        title: Text(widget.stop["address"]),
         trailing: getFavIcon(),
         onTap: () => onTapSearchedItem(widget.stop),
       );}

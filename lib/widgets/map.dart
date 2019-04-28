@@ -39,7 +39,9 @@ class TransitMapState extends State<TransitMap> {
   RouteDB db = new RouteDB();
   final markerColours = {
     Operator.DublinBus: BitmapDescriptor.hueYellow,
-    Operator.IarnrodEireann: BitmapDescriptor.hueGreen
+    Operator.IarnrodEireann: BitmapDescriptor.hueGreen,
+    Operator.BusEireann: BitmapDescriptor.hueRed,
+    Operator.Luas: BitmapDescriptor.hueMagenta,
   };
 
   @override
@@ -77,34 +79,20 @@ class TransitMapState extends State<TransitMap> {
     );
   }
 
-  void _updateMarkers(CameraPosition p) async {
+  void _updateMarkers(CameraPosition p) {
     if (p.zoom > minimumZoom) {
-      db.getNearbyStops(p.target).then(
-        (list) {
-          var markerStopsByCode = <String,Stop>{};
-          var markerMapList = list.map((stopMap) {
-            if(markerStopsByCode[stopMap["stop_code"]] == null) {
-              final loc = LatLng(double.parse(stopMap["latitude"]),
-                  double.parse(stopMap["longitude"]));
-              final stop = Stop(stopCode: stopMap["stop_code"],
-                address: stopMap["address"],
-                latLng: loc,
-                operators: [ operators[stopMap["operator"]], ]
-              );
-              markerStopsByCode.addAll({stop.stopCode: stop});
-              return Marker(
-                icon: BitmapDescriptor.defaultMarkerWithHue(
-                    markerColours[operators[stopMap["operator"]]]),
-                markerId: MarkerId(stopMap["stop_code"]),
-                position: loc,
-                infoWindow: InfoWindow(title: stopMap["stop_code"],
-                    snippet: stopMap["address"],
-                ),
-                onTap: () => _tapMarker(stop),
-              );
-            } else {
-              markerStopsByCode[stopMap["stop_code"]].operators.add(stopMap["operator"]);
-            }
+      db.getNearbyStops(p.target).then((stops) {
+          var markerMapList = stops.map((stop) {
+            return Marker(
+              icon: BitmapDescriptor.defaultMarkerWithHue(
+                  markerColours[stop.operators[0]]),
+              markerId: MarkerId(stop.stopCode),
+              position: stop.latLng,
+              infoWindow: InfoWindow(title: stop.stopCode,
+                  snippet: stop.address,
+              ),
+              onTap: () => _tapMarker(stop),
+            );
           });
           setState(() {
             markers = markerMapList.toSet();
