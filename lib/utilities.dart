@@ -165,7 +165,7 @@ class LuasAPI  implements RealTimeAPI {
 
   Future<ETree> _getRealTimeStopDataTree(String stopCode) async {
     http.Response response = await http.get('http://luasforecasts.rpa.ie/xml/get.ashx?action=forecast&encrypt=false&stop=$stopCode');
-    return ETree.fromString(response);
+    return ETree.fromString(response.body);
   }
 
   @override
@@ -177,7 +177,7 @@ class LuasAPI  implements RealTimeAPI {
       timings = xmlStopData.map((element){
         Timing details = new Timing(
           heading: element.attributes["destination"],
-          dueMins: element.attributes["dueMins"],
+          dueMins: int.parse(element.attributes["dueMins"]),
         );
 //        TODO: Figure out how to parse direction, journey, route for luas
         return details;
@@ -204,11 +204,13 @@ class RealTimeUtilities {
     }
     if(stop.operators.contains(Operator.BusEireann)) {
       var beTimings = await BusEireannAPI().getTimings(stop.apiStopCode);
-      print(beTimings);
       if (beTimings != null) stopData.timings.addAll(beTimings);
     }
+    if(stop.operators.contains(Operator.Luas)) {
+      var luasTimings = await LuasAPI().getTimings(stop.apiStopCode);
+      if (luasTimings != null) stopData.timings.addAll(luasTimings);
+    }
     stopData.timings.sort((a, b) => a.dueMins.compareTo(b.dueMins));
-    print(stopData.timings);
     return stopData;
   }
 
