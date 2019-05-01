@@ -38,7 +38,6 @@ class TransitMapState extends State<TransitMap> {
   );
   var currentPosition = initialPosition;
   LatLng userPosition;
-  var locationGot = false;
   RouteDB db = new RouteDB();
   final markerColours = {
     Operator.DublinBus: BitmapDescriptor.hueYellow,
@@ -50,10 +49,10 @@ class TransitMapState extends State<TransitMap> {
   @override
   void initState() {
     super.initState();
-    var location = new Location();
-    location.onLocationChanged().listen((loc) => userPosition = LatLng(loc.latitude, loc.longitude));
-    location.getLocation().then((loc) {
-      locationGot = true;
+    print("get location");
+    var locationListener = Location().onLocationChanged();
+    locationListener.first.then((loc) {
+      print("location got");
       setState(() {
         userPosition = LatLng(loc.latitude, loc.longitude);
         currentPosition = CameraPosition(
@@ -62,18 +61,25 @@ class TransitMapState extends State<TransitMap> {
         );
       });
       widget.controller.future.then((controller) {
+        print("animated camera");
         controller.animateCamera(
             CameraUpdate.newCameraPosition(currentPosition));
       });
+    });
+    locationListener.listen((loc) {
+      print("listener got location");
+      userPosition = LatLng(loc.latitude, loc.longitude);
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    if (markers == null) _updateMarkers(currentPosition);
     return GoogleMap(
       initialCameraPosition: currentPosition,
       onMapCreated: (GoogleMapController controller) async {
         widget.controller.complete(controller);
+        print("completed");
       },
       myLocationEnabled: true,
       compassEnabled: true,
@@ -87,34 +93,26 @@ class TransitMapState extends State<TransitMap> {
   DateTime getNearbyStopsLastCalled;
 
   void _updateMarkers(CameraPosition p) {
-    if (//p.zoom > minimumZoom &&
-        (getNearbyStopsLastCalled == null || DateTime.now().difference(getNearbyStopsLastCalled).inMilliseconds > 20)) {
-      getNearbyStopsLastCalled = DateTime.now();
-      db.getNearbyStops(p.target).then((stops) {
-          var markerMapList = stops.map((stop) {
-            return Marker(
-              icon: BitmapDescriptor.defaultMarkerWithHue(
-                  markerColours[stop.operator]),
-              markerId: MarkerId(stop.stopCode),
-              position: stop.latLng,
-              infoWindow: InfoWindow(title: stop.stopCode,
-                  snippet: stop.address,
-              ),
-              onTap: () => _tapMarker(stop),
-            );
-          });
-          setState(() {
-            markers = markerMapList.toSet();
-            currentPosition = p;
-          });
-        }
-      );
-    } else if (locationGot){
-      setState(() {
-        markers = null;
-        currentPosition = p;
-      });
-    }
+    getNearbyStopsLastCalled = DateTime.now();
+    db.getNearbyStops(p.target).then((stops) {
+        var markerMapList = stops.map((stop) {
+          return Marker(
+            icon: BitmapDescriptor.defaultMarkerWithHue(
+                markerColours[stop.operator]),
+            markerId: MarkerId(stop.stopCode),
+            position: stop.latLng,
+            infoWindow: InfoWindow(title: stop.stopCode,
+                snippet: stop.address,
+            ),
+            onTap: () => _tapMarker(stop),
+          );
+        });
+        setState(() {
+          markers = markerMapList.toSet();
+          currentPosition = p;
+        });
+      }
+    );
   }
 
   void _tapMarker(Stop stop) {
