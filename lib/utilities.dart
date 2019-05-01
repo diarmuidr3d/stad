@@ -142,7 +142,9 @@ class BusEireannAPI  implements RealTimeAPI {
 
   @override
   Future<List<Timing>> getTimings(String stopCode) async {
+    print(stopCode);
     var stopMap = await _getRealTimeStopDataTree(stopCode);
+    print(stopMap);
     var timings = <Timing>[];
     for (var v in stopMap.values) {
       if (v != 0 && v["departure_data"] != null) {
@@ -200,21 +202,20 @@ class LuasAPI  implements RealTimeAPI {
 class RealTimeUtilities {
 
   static Future<RealTimeStopData> getStopTimings(Stop stop) async {
-    final stopCode = stop.stopCode;
     final stopData = RealTimeStopData(stop: stop);
     if (stop.operator == null) throw Exception("No operator for stop ${stop.stopCode}");
     switch (stop.operator) {
       case Operator.BusEireann:
-        stopData.timings = await BusEireannAPI().getTimings(stopCode);
+        stopData.timings = await BusEireannAPI().getTimings(stop.apiStopCode);
         break;
       case Operator.DublinBus:
-        stopData.timings = await DublinBusAPI().getTimings(stopCode);
+        stopData.timings = await DublinBusAPI().getTimings(stop.stopCode);
         break;
       case Operator.IarnrodEireann:
-        stopData.timings = await IarnrodEireannAPI().getTimings(stopCode);
+        stopData.timings = await IarnrodEireannAPI().getTimings(stop.stopCode);
         break;
       case Operator.Luas:
-        stopData.timings = await LuasAPI().getTimings(stopCode);
+        stopData.timings = await LuasAPI().getTimings(stop.stopCode);
         break;
     }
     stopData.timings.sort((a, b) => a.dueMins.compareTo(b.dueMins));
