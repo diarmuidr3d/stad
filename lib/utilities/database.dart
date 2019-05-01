@@ -100,22 +100,22 @@ class RouteDB {
     return stops;
   }
 
-  Future<List<Stop>> getNearbyStops(LatLng latLng) async {
+  /// Retrieves the stops within the [stopLoadRange] of [latLng].
+  Future<List<Stop>> getNearbyStops(LatLng latLng, { double stopLoadRange = 0.006 }) async {
     print("getNearbyStops");
-    final stopLoadRange = "0.006"; // The range for which to load the stop markers
+    final stopLoadRange = 0.006; // The range for which to load the stop markers
     Database db = await databaseFuture;
-    var lat = latLng.latitude.toString();
-    var lng = latLng.longitude.toString();
+    var lat = latLng.latitude;
+    var lng = latLng.longitude;
+//    NB: The negative longitude is considered positive (eg: -1 < -2)
     final result = await db.rawQuery("""
         SELECT stop_code, longitude, latitude, address, operator, api_stop_code
-        FROM stops
-        WHERE (latitude - "$lat") < $stopLoadRange
-          AND (latitude - "$lat") > -$stopLoadRange
-          AND (longitude - "$lng") < $stopLoadRange
-          AND (longitude - "$lng") > -$stopLoadRange 
-          LIMIT 50; """
-    );
-    return result.map((stopMap) => Stop.fromMap(stopMap));
+        FROM stops 
+        WHERE latitude < "${lat + stopLoadRange}"
+          AND latitude > "${lat - stopLoadRange}"
+          AND longitude > "${lng + stopLoadRange}"
+          AND longitude < "${lng - stopLoadRange}" ;  """);
+    return result.map((stopMap) => Stop.fromMap(stopMap)).toList();
   }
 
 

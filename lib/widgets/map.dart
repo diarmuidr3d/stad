@@ -11,6 +11,9 @@ import 'package:stad/keys.dart';
 import 'package:stad/utilities/database.dart';
 
 class TransitMap extends StatefulWidget {
+  static const SOUTHWEST_BOUND = LatLng(51.294321, -10.576554);
+  static const NORTHEAST_BOUND = LatLng(55.402704, -5.452611);
+
   final Completer<GoogleMapController> controller;
   final Function onStopTapped;
 
@@ -77,13 +80,15 @@ class TransitMapState extends State<TransitMap> {
       markers: markers,
       onCameraMove: (CameraPosition p) => currentPosition = p,
       onCameraIdle: () => _updateMarkers(currentPosition),
+      cameraTargetBounds: CameraTargetBounds(LatLngBounds(southwest: TransitMap.SOUTHWEST_BOUND, northeast: TransitMap.NORTHEAST_BOUND)),
     );
   }
 
   DateTime getNearbyStopsLastCalled;
 
   void _updateMarkers(CameraPosition p) {
-    if (p.zoom > minimumZoom && (getNearbyStopsLastCalled == null || DateTime.now().difference(getNearbyStopsLastCalled).inMilliseconds > 20)) {
+    if (//p.zoom > minimumZoom &&
+        (getNearbyStopsLastCalled == null || DateTime.now().difference(getNearbyStopsLastCalled).inMilliseconds > 20)) {
       getNearbyStopsLastCalled = DateTime.now();
       db.getNearbyStops(p.target).then((stops) {
           var markerMapList = stops.map((stop) {
