@@ -34,6 +34,8 @@ class SearchAppBar extends StatelessWidget {
           Expanded(child: TextField(
             controller: textFieldController,
             key: Keys.searchField,
+            autofocus: searching,
+            enabled: !searching,
             decoration: InputDecoration(
                 hintText: Strings.search,
                 border: InputBorder.none,

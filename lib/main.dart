@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:stad/styles.dart';
-import 'package:stad/widgets/home.dart';
+import 'package:stad/views/home.dart';
 
 void main() => runApp(MyApp());
 

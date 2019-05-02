@@ -7,6 +7,7 @@ import 'package:stad/keys.dart';
 import 'package:stad/models.dart';
 import 'package:stad/utilities.dart';
 import 'package:stad/utilities/database.dart';
+import 'package:stad/views/search.dart';
 import 'package:stad/widgets/fav_drawer.dart';
 import 'package:stad/widgets/search_app_bar.dart';
 import 'package:stad/widgets/search_stops.dart';
@@ -63,11 +64,11 @@ class HomeState extends State<Home> {
         right: 0.0,
         child: SearchAppBar(
           scaffoldKey: Keys.scaffoldKey,
-          onTapCallback: startSearching,
+          onTapCallback: () => startSearching(context),
           searching: searching,
           viewingStop: viewingStop,
           backCallback: clearSearch,
-          handleInputCallback: searchForStopMatching,
+          handleInputCallback: () {},
           textFieldController: searchFieldController,
         )
     ));
@@ -85,7 +86,10 @@ class HomeState extends State<Home> {
     });
   }
 
-  void startSearching() => setState(() => searching = true);
+//  void startSearching() => setState(() => searching = true);
+  void startSearching( context) {
+    Navigator.push(context, MaterialPageRoute(builder: (context) => SearchView()));
+  }
 
   void closeFavsOnSelect(Stop stop) {
     Navigator.of(context).pop();
@@ -124,11 +128,5 @@ class HomeState extends State<Home> {
     FocusScope.of(context).requestFocus(new FocusNode());
   }
 
-  void searchForStopMatching(String string) async {
-    var db = new RouteDB();
-    final list = await db.getStopsMatchingParm(string);
-    setState(() {
-      searchedStops = list;
-    });
-  }
+
 }
