@@ -21,6 +21,7 @@ class Home extends StatefulWidget {
 
 class HomeState extends State<Home> {
   bool searching = false;
+  bool viewingStop = false;
   List<String> currentFavourites;
   List searchedStops;
   Stop selectedStop;
@@ -64,6 +65,7 @@ class HomeState extends State<Home> {
           scaffoldKey: Keys.scaffoldKey,
           onTapCallback: startSearching,
           searching: searching,
+          viewingStop: viewingStop,
           backCallback: clearSearch,
           handleInputCallback: searchForStopMatching,
           textFieldController: searchFieldController,
@@ -96,6 +98,7 @@ class HomeState extends State<Home> {
     _panelController.setPanelPosition(0.6);
     setState(() {
       selectedStop = stop;
+      viewingStop = true;
     });
   }
 
@@ -114,6 +117,7 @@ class HomeState extends State<Home> {
   void clearSearch() { 
     setState(() {
       searching = false;
+      viewingStop = false;
       selectedStop = null;
     });
     searchFieldController.text = "";
