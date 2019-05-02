@@ -60,11 +60,7 @@ class TransitMapState extends State<TransitMap> {
           zoom: 17,
         );
       });
-      widget.controller.future.then((controller) {
-        print("animated camera");
-        controller.animateCamera(
-            CameraUpdate.newCameraPosition(currentPosition));
-      });
+      moveCameraTo(userPosition);
     });
     locationListener.listen((loc) {
       print("listener got location");
@@ -75,19 +71,40 @@ class TransitMapState extends State<TransitMap> {
   @override
   Widget build(BuildContext context) {
     if (markers == null) _updateMarkers(currentPosition);
-    return GoogleMap(
+    return Stack(children: <Widget>[
+    GoogleMap(
       initialCameraPosition: currentPosition,
       onMapCreated: (GoogleMapController controller) async {
         widget.controller.complete(controller);
         print("completed");
       },
       myLocationEnabled: true,
-      compassEnabled: true,
+      compassEnabled: false,
       markers: markers,
       onCameraMove: (CameraPosition p) => currentPosition = p,
       onCameraIdle: () => _updateMarkers(currentPosition),
       cameraTargetBounds: CameraTargetBounds(LatLngBounds(southwest: TransitMap.SOUTHWEST_BOUND, northeast: TransitMap.NORTHEAST_BOUND)),
-    );
+    ),
+    Positioned(
+      top: 100,
+        right: 10,
+        child:
+    Container(
+      child: IconButton(icon: Icon(Icons.my_location), onPressed: () {
+        setState(() {
+          currentPosition = CameraPosition(target: userPosition, zoom: 17);
+        });
+        moveCameraTo(userPosition);
+      },),
+      decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.all(Radius.circular(35)),
+        border: Border.all(color: Colors.grey),
+      ),
+      width: 60,
+      height: 60,
+    ))
+    ],);
   }
 
   DateTime getNearbyStopsLastCalled;
@@ -119,7 +136,10 @@ class TransitMapState extends State<TransitMap> {
     widget.onStopTapped(stop);
   }
 
-  void moveCameraTo(double lat, double lng) {
-
+  void moveCameraTo(LatLng latLng) {
+    widget.controller.future.then((controller) {
+      print("animated camera");
+      controller.animateCamera(CameraUpdate.newCameraPosition(currentPosition));
+    });
   }
 }
