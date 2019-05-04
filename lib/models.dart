@@ -88,13 +88,15 @@ class Timing {
   int dueMins;
   String journeyReference;
   int inbound;
+  bool realTime;
 
   Timing({
     this.route,
     this.heading,
     this.dueMins,
     this.journeyReference,
-    this.inbound
+    this.inbound,
+    this.realTime = true,
   });
 
   String toString() => "$route - $heading: $dueMins mins";

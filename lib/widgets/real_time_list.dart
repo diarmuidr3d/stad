@@ -70,10 +70,7 @@ class IarnrodItem extends RealTimeItem {
       title: Text(
         timing.heading,
       ),
-      trailing: Text(
-          timing.dueMins.toString() + " " + Strings.shortenedMinutes,
-          style: Styles.biggerFont,
-        ),
+      trailing: RealTimeMins(timing: timing,),
     );
   }
 }
@@ -95,13 +92,32 @@ class DublinBusItem extends RealTimeItem {
       title: Text(
         timing.heading,
       ),
-      trailing: Text(
-        timing.dueMins.toString() + " " + Strings.shortenedMinutes,
-        style: Styles.biggerFont,
-      ),
-//      onTap: () {_openFinder();},
+      trailing: RealTimeMins(timing: timing,),
     );
   }
+}
+
+class RealTimeMins extends StatelessWidget {
+  final Timing timing;
+
+  const RealTimeMins({this.timing});
+
+  @override
+  Widget build(BuildContext context) {
+    if (timing.realTime) {
+      return Row(mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Icon(Icons.rss_feed, color: Colors.green,),
+          Text("${timing.dueMins} ${Strings.shortenedMinutes}",
+            style: Styles.biggerFont,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,)
+        ],);
+    } else {
+      return Text("${timing.dueMins} ${Strings.shortenedMinutes}", style: Styles.biggerFont,);
+    }
+  }
+
 }
 
 class RealTimePage extends StatefulWidget {
