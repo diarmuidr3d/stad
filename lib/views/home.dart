@@ -6,11 +6,10 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:stad/keys.dart';
 import 'package:stad/models.dart';
 import 'package:stad/utilities.dart';
-import 'package:stad/utilities/database.dart';
 import 'package:stad/views/search.dart';
+import 'package:stad/views/stop.dart';
 import 'package:stad/widgets/fav_drawer.dart';
 import 'package:stad/widgets/search_app_bar.dart';
-import 'package:stad/widgets/search_stops.dart';
 import 'package:stad/widgets/slide_open_panel.dart';
 import 'package:stad/widgets/map.dart';
 import 'package:stad/widgets/bottom_up_panel.dart';
@@ -21,15 +20,12 @@ class Home extends StatefulWidget {
 }
 
 class HomeState extends State<Home> {
-  bool searching = false;
-  bool viewingStop = false;
   List<String> currentFavourites;
   List searchedStops;
   Stop selectedStop;
   final TextEditingController searchFieldController = TextEditingController();
   final PanelController _panelController = PanelController();
   var mapCompleter = Completer<GoogleMapController>();
-  double parallax = 0.0;
 
   @override
   void initState() {
@@ -40,92 +36,44 @@ class HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    var body = <Widget>[
-      Positioned(
-        top: parallax,
-        child: Container(
-          height: MediaQuery.of(context).size.height,
-          width: MediaQuery.of(context).size.width,
-          child: TransitMap(controller: mapCompleter, onStopTapped: selectStopInSearch,),
-        )
-      ),
-      BottomUpPanel(stop: selectedStop, panelController: _panelController, onHeightChanged: setParallax, onNearbyStopSelected: selectStopInSearch,),
-    ];
-    if (searching) {
-      if(searchedStops == null) searchedStops = currentFavourites;
-      body.add(Container(
-          child: SearchStops(stops: searchedStops, stopTapCallback: selectStopInSearch,),
-          decoration: BoxDecoration(color: Colors.white,)
-      ));
-    }
-    body.add(Positioned(
-        top: 0.0,
-        left: 0.0,
-        right: 0.0,
-        child: SearchAppBar(
-          scaffoldKey: Keys.scaffoldKey,
-          onTapCallback: () => startSearching(context),
-          searching: searching,
-          viewingStop: viewingStop,
-          backCallback: clearSearch,
-          handleInputCallback: () {},
-          textFieldController: searchFieldController,
-        )
-    ));
-
     return Scaffold(
       key: Keys.scaffoldKey,
       drawer: FavDrawer(onStopTap: closeFavsOnSelect,),
-      body: Stack(children: body, )
+      body: Stack(children: <Widget>[
+        Container(
+          height: MediaQuery.of(context).size.height,
+          width: MediaQuery.of(context).size.width,
+          child: TransitMap(controller: mapCompleter, onStopTapped: viewStop, interactionEnabled: true),
+        ),
+        BottomUpPanel(panelController: _panelController, onNearbyStopSelected: viewStop,),
+        Positioned(
+            top: 0.0,
+            left: 0.0,
+            right: 0.0,
+            child: SearchAppBar(
+              scaffoldKey: Keys.scaffoldKey,
+              onTapCallback: () => startSearching(context),
+              searching: false,
+              viewingStop: false,
+              backCallback: () {},
+              handleInputCallback: () {},
+              textFieldController: searchFieldController,
+            )
+        )
+      ], )
     );
   }
 
-  void setParallax(double value) {
-    setState(() {
-      parallax = -value * (MediaQuery.of(context).size.height - 120 - 120) * 0.5;
-    });
+  void viewStop(Stop stop) {
+    Navigator.push(context, MaterialPageRoute(builder: (context) => StopView(stop: stop,)));
   }
 
-//  void startSearching() => setState(() => searching = true);
   void startSearching( context) {
     Navigator.push(context, MaterialPageRoute(builder: (context) => SearchView()));
   }
 
   void closeFavsOnSelect(Stop stop) {
-    Navigator.of(context).pop();
-    selectStopInSearch(stop);
-  }
-
-  void selectStopInSearch(Stop stop) {
-    clearSearchToString(stop.toString());
-    moveMapCameraTo(stop.latLng.latitude, stop.latLng.longitude);
-    _panelController.setPanelPosition(0.6);
-    setState(() {
-      selectedStop = stop;
-      viewingStop = true;
-    });
-  }
-
-  void moveMapCameraTo(double lat, double lng) {
-    mapCompleter.future.then((controller){
-      controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
-          target: LatLng(lat, lng), zoom: 17)));
-    });
-  }
-
-  void clearSearchToString(String string) {
-    clearSearch();
-    searchFieldController.text = string;
-  }
-
-  void clearSearch() { 
-    setState(() {
-      searching = false;
-      viewingStop = false;
-      selectedStop = null;
-    });
-    searchFieldController.text = "";
-    FocusScope.of(context).requestFocus(new FocusNode());
+    viewStop(stop);
   }
 
 

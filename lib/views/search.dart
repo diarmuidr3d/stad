@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:stad/keys.dart';
 import 'package:stad/utilities/database.dart';
+import 'package:stad/views/stop.dart';
 import 'package:stad/widgets/search_app_bar.dart';
 import 'package:stad/widgets/search_stops.dart';
 
@@ -23,7 +24,9 @@ class SearchViewState extends State<SearchView> {
 //        key: Keys.scaffoldKey,
         body: Stack(children: <Widget>[
           Container(
-              child: SearchStops(stops: searchedStops, stopTapCallback: (){},),
+              child: SearchStops(stops: searchedStops, stopTapCallback: (stop){
+                Navigator.push(context, MaterialPageRoute(builder: (context) => StopView(stop: stop,)));
+                },),
               decoration: BoxDecoration(color: Colors.white,)
           ),
           Positioned(
