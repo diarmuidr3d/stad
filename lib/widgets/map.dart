@@ -9,6 +9,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'package:stad/keys.dart';
 import 'package:stad/utilities/database.dart';
+import 'package:stad/utilities/map_icons.dart';
 
 class TransitMap extends StatefulWidget {
   static const SOUTHWEST_BOUND = LatLng(51.294321, -10.576554);
@@ -17,6 +18,7 @@ class TransitMap extends StatefulWidget {
   final Completer<GoogleMapController> controller;
   final Function onStopTapped;
   final bool interactionEnabled;
+  final Stop stopToShow;
 
   final CameraPosition initialPosition;
 
@@ -24,6 +26,7 @@ class TransitMap extends StatefulWidget {
     @required this.controller,
     @required this.onStopTapped,
     @required this.interactionEnabled,
+    this.stopToShow,
     this.initialPosition = const CameraPosition(
       target: LatLng(53.3834, -8.2177501),
       zoom: 7,
@@ -42,19 +45,8 @@ class TransitMapState extends State<TransitMap> {
   final minimumZoom = 14; // The minimum zoom level required to see markers
   var currentPosition;
   LatLng userPosition;
-  RouteDB db = new RouteDB();
-  final markerColours = {
-    Operator.DublinBus: BitmapDescriptor.hueYellow,
-    Operator.IarnrodEireann: BitmapDescriptor.hueGreen,
-    Operator.BusEireann: BitmapDescriptor.hueRed,
-    Operator.Luas: BitmapDescriptor.hueMagenta,
-  };
-  var markerIcons = <Operator, BitmapDescriptor>{
-    Operator.DublinBus: null,
-    Operator.IarnrodEireann: null,
-    Operator.BusEireann: null,
-    Operator.Luas: null,
-  };
+  RouteDB db = RouteDB();
+  MapIcons mapIcons;
 
   TransitMapState({
     this.currentPosition
@@ -63,29 +55,32 @@ class TransitMapState extends State<TransitMap> {
   @override
   void initState() {
     super.initState();
-    print("get location");
-    var locationListener = Location().onLocationChanged();
-    locationListener.first.then((loc) {
-      print("location got");
-      setState(() {
-        userPosition = LatLng(loc.latitude, loc.longitude);
-        currentPosition = CameraPosition(
-          target: userPosition,
-          zoom: 17,
-        );
+    if(widget.stopToShow == null) {
+      var locationListener = Location().onLocationChanged();
+      locationListener.first.then((loc) {
+        print("location got");
+        setState(() {
+          userPosition = LatLng(loc.latitude, loc.longitude);
+          currentPosition = CameraPosition(
+            target: userPosition,
+            zoom: 17,
+          );
+        });
+        moveCameraTo(userPosition);
       });
-      moveCameraTo(userPosition);
-    });
-    locationListener.listen((loc) {
-      print("listener got location");
-      userPosition = LatLng(loc.latitude, loc.longitude);
-    });
+      locationListener.listen((loc) {
+        print("listener got location");
+        userPosition = LatLng(loc.latitude, loc.longitude);
+      });
+    } else {
+      currentPosition = CameraPosition(target: widget.stopToShow.latLng, zoom: 17,);
+    }
     }
 
   @override
   Widget build(BuildContext context) {
-    getMarkerIcons(context);
-    if (markers == null) _updateMarkers(currentPosition);
+    mapIcons = MapIcons(context: context);
+    if (markers == null) _updateMarkers(currentPosition, context);
     return GoogleMap(
       initialCameraPosition: currentPosition,
       onMapCreated: (GoogleMapController controller) async {
@@ -101,23 +96,21 @@ class TransitMapState extends State<TransitMap> {
       compassEnabled: false,
       markers: markers,
       onCameraMove: (CameraPosition p) => currentPosition = p,
-      onCameraIdle: () => _updateMarkers(currentPosition),
+      onCameraIdle: () => _updateMarkers(currentPosition, context),
       cameraTargetBounds: CameraTargetBounds(LatLngBounds(southwest: TransitMap.SOUTHWEST_BOUND, northeast: TransitMap.NORTHEAST_BOUND)),
     );
   }
 
   DateTime getNearbyStopsLastCalled;
 
-  void _updateMarkers(CameraPosition p) {
+  void _updateMarkers(CameraPosition p, BuildContext context) {
     getNearbyStopsLastCalled = DateTime.now();
     db.getNearbyStops(p.target).then((stops) {
         Iterable<Marker> markerMapList = stops.map((stop) {
+          var iconType = IconType.Base;
+          if (widget.stopToShow != null && stop.stopCode == widget.stopToShow.stopCode) iconType = IconType.Selected;
           return Marker(
-            icon: markerIcons[stop.operator] != null ?
-              markerIcons[stop.operator]
-              :
-              BitmapDescriptor.defaultMarkerWithHue(
-                markerColours[stop.operator]),
+            icon: mapIcons.getMarkerIconForOperatorAndType(stop.operator, iconType, context),
             markerId: MarkerId(stop.stopCode),
             position: stop.latLng,
             infoWindow: InfoWindow(title: stop.stopCode,
@@ -130,7 +123,6 @@ class TransitMapState extends State<TransitMap> {
             ,
             consumeTapEvents: !widget.interactionEnabled,
           );
-
         });
         setState(() {
           markers = markerMapList.toSet();
@@ -138,29 +130,6 @@ class TransitMapState extends State<TransitMap> {
         });
       }
     );
-  }
-
-  void getMarkerIcons(BuildContext context) {
-    if (markerIcons[Operator.DublinBus] == null) {
-      BitmapDescriptor.fromAssetImage(
-          createLocalImageConfiguration(context), "assets/img/DublinBusLogo.png")
-          .then((icon) {setState(() => markerIcons[Operator.DublinBus] = icon);});
-    }
-    if (markerIcons[Operator.IarnrodEireann] == null) {
-      BitmapDescriptor.fromAssetImage(
-          createLocalImageConfiguration(context), "assets/img/irish_rail_icon.png")
-          .then((icon) {setState(() => markerIcons[Operator.IarnrodEireann] = icon);});
-    }
-    if (markerIcons[Operator.Luas] == null) {
-      BitmapDescriptor.fromAssetImage(
-          createLocalImageConfiguration(context), "assets/img/luas_icon.png")
-          .then((icon) {setState(() => markerIcons[Operator.Luas] = icon);});
-    }
-    if (markerIcons[Operator.BusEireann] == null) {
-      BitmapDescriptor.fromAssetImage(
-          createLocalImageConfiguration(context), "assets/img/bus_eireann_icon.png")
-          .then((icon) {setState(() => markerIcons[Operator.BusEireann] = icon);});
-    }
   }
 
   void _tapMarker(Stop stop) {

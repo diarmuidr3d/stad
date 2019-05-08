@@ -51,7 +51,7 @@ class StopViewState extends State<StopView> {
                 controller: Completer(),
                 onStopTapped: () {},
                 interactionEnabled: false,
-                initialPosition: CameraPosition(target: widget.stop.latLng, zoom: 17),
+                stopToShow: widget.stop,
               )
             ),
             Row(children: <Widget>[
