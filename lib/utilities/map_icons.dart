@@ -26,7 +26,7 @@ class MapIcons {
     Operator.Luas: {IconType.Base: null, IconType.Selected: null},
   };
 
-  var _markerFiles = <Operator, Map<IconType, String>>{
+  static final markerFiles = <Operator, Map<IconType, String>>{
     Operator.DublinBus: {
       IconType.Base: "assets/img/dublin_bus_icon.png",
       IconType.Selected: "assets/img/dublin_bus_icon_selected.png"
@@ -62,7 +62,7 @@ class MapIcons {
   Future<BitmapDescriptor> getMarkerIconForOperatorAndTypeAsync(BuildContext context, Operator operator, IconType iconType) async {
     if (_markerIcons[operator][iconType] != null) return _markerIcons[operator][iconType];
     else {
-      _markerIcons[operator][iconType] = await BitmapDescriptor.fromAssetImage(createLocalImageConfiguration(context), _markerFiles[operator][iconType]);
+      _markerIcons[operator][iconType] = await BitmapDescriptor.fromAssetImage(createLocalImageConfiguration(context), markerFiles[operator][iconType]);
       return _markerIcons[operator][iconType];
     }
   }
