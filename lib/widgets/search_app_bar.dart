@@ -8,6 +8,7 @@ class SearchAppBar extends StatelessWidget {
   final scaffoldKey;
   final Function onTapCallback;
   final bool searching;
+  final bool viewingStop;
   final Function backCallback;
   final Function handleInputCallback;
   final TextEditingController textFieldController;
@@ -17,6 +18,7 @@ class SearchAppBar extends StatelessWidget {
     @required this.scaffoldKey,
     @required this.onTapCallback,
     @required this.searching,
+    @required this.viewingStop,
     @required this.backCallback,
     @required this.handleInputCallback,
     @required this.textFieldController
@@ -32,6 +34,8 @@ class SearchAppBar extends StatelessWidget {
           Expanded(child: TextField(
             controller: textFieldController,
             key: Keys.searchField,
+            autofocus: searching,
+            enabled: !searching,
             decoration: InputDecoration(
                 hintText: Strings.search,
                 border: InputBorder.none,
@@ -52,7 +56,7 @@ class SearchAppBar extends StatelessWidget {
   }
 
   IconButton getIcon(context) {
-    if (searching) {
+    if (searching || viewingStop) {
       return IconButton(icon: Icon(Icons.arrow_back),
         onPressed: () {
           backCallback();
