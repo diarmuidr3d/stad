@@ -5,9 +5,7 @@ import 'package:location/location.dart';
 import 'package:stad/models.dart';
 import 'package:stad/resources/strings.dart';
 import 'package:stad/styles.dart';
-import 'package:stad/utilities.dart';
 import 'package:stad/utilities/database.dart';
-import 'package:stad/widgets/real_time_list.dart';
 import 'package:stad/widgets/slide_open_panel.dart';
 
 class BottomUpPanel extends StatefulWidget {
