@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:stad/models.dart';
 import 'package:stad/resources/strings.dart';
 import 'package:stad/styles.dart';
-import 'package:stad/utilities.dart';
 import 'package:stad/utilities/database.dart';
+import 'package:stad/utilities/favourites.dart';
 
 class FavDrawer extends StatefulWidget {
   final onStopTap;

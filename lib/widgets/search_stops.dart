@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:stad/models.dart';
 import 'package:stad/styles.dart';
-import 'package:stad/utilities.dart';
+import 'package:stad/utilities/favourites.dart';
 import 'package:stad/utilities/map_icons.dart';
 import 'package:stad/widgets/fav_drawer.dart';
 

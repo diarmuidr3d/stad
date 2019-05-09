@@ -5,7 +5,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'package:stad/keys.dart';
 import 'package:stad/models.dart';
-import 'package:stad/utilities.dart';
+import 'package:stad/utilities/favourites.dart';
 import 'package:stad/views/search.dart';
 import 'package:stad/views/stop.dart';
 import 'package:stad/widgets/fav_drawer.dart';
