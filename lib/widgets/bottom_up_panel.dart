@@ -6,6 +6,7 @@ import 'package:stad/models.dart';
 import 'package:stad/resources/strings.dart';
 import 'package:stad/styles.dart';
 import 'package:stad/utilities/database.dart';
+import 'package:stad/widgets/search_stops.dart';
 import 'package:stad/widgets/slide_open_panel.dart';
 
 class BottomUpPanel extends StatefulWidget {
@@ -62,15 +63,9 @@ class BottomUpPanelState extends State<BottomUpPanel> {
     if (nearbyStops != null) {
       body.addAll(<Widget>[
         Row(children: <Widget>[Spacer(), Text(Strings.nearbyStops, style: Styles.biggerFont,), Spacer(),]),
-        Expanded(child: ListView.builder(
-          itemCount: nearbyStops.length,
-          itemBuilder: (context, i) {
-            return ListTile(
-              leading: Text(nearbyStops[i].stopCode, style: Styles.routeNumberStyle,),
-              title: Text(nearbyStops[i].address),
-              onTap: () => widget.onNearbyStopSelected(nearbyStops[i]),
-            );
-          },
+        Expanded(child: SearchStops(
+          stops: nearbyStops,
+          stopTapCallback: widget.onNearbyStopSelected,
         )),
       ]);
     }

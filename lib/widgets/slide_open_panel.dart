@@ -121,7 +121,6 @@ class SlidingUpPanel extends StatefulWidget {
   final SlideDirection slideDirection;
 
   final double initialHeight;
-  final Function onHeightChanged;
 
   SlidingUpPanel({
     Key key,
@@ -156,7 +155,6 @@ class SlidingUpPanel extends StatefulWidget {
     this.isDraggable = true,
     this.slideDirection = SlideDirection.UP,
     this.initialHeight = 0.0,
-    this.onHeightChanged,
   }) : assert(0 <= backdropOpacity && backdropOpacity <= 1.0),
         super(key: key);
 
@@ -180,7 +178,6 @@ class _SlidingUpPanelState extends State<SlidingUpPanel> with SingleTickerProvid
       value: widget.initialHeight
     )..addListener((){
       setState((){});
-      widget.onHeightChanged(_ac.value);
 
       if(widget.onPanelSlide != null) widget.onPanelSlide(_ac.value);
 

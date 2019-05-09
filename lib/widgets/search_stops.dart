@@ -44,16 +44,21 @@ class StopResultState extends State<StopResult> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.stop is Map) {
-      final stop = Stop.fromMap(widget.stop);
-      Favourites().isFavourite(stop.stopCode).then((isFav) => setState(() => isFavourite = isFav));
-      return ListTile(
-        leading: Image.asset(MapIcons.markerFiles[stop.operator][IconType.Base]),
-        title: Row(children: <Widget>[Text(stop.stopCode, style: Styles.routeNumberStyle,), Text(stop.address)],),
-        trailing: getFavIcon(),
-        onTap: () => widget.stopTapCallback(stop),
-      );}
-    else return FavListTile(stopCode: widget.stop, onTap: widget.stopTapCallback,); // If the stop is just a stopcode
+    if (widget.stop is String) return FavListTile(stopCode: widget.stop, onTap: widget.stopTapCallback,); // If the stop is just a stopcode
+    var stop = widget.stop;
+    if (stop is Map) stop = Stop.fromMap(stop);
+    Favourites().isFavourite(stop.stopCode).then((isFav) => setState(() => isFavourite = isFav));
+    return ListTile(
+      leading: Image.asset(MapIcons.markerFiles[stop.operator][IconType.Base]),
+      title: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Text(stop.stopCode, style: Styles.routeNumberStyle,),
+          Expanded(child:Text(stop.address, overflow: TextOverflow.ellipsis, maxLines: 1,) ),
+        ],),
+      trailing: getFavIcon(),
+      onTap: () => widget.stopTapCallback(stop),
+    );
   }
 
 

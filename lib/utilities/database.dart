@@ -95,15 +95,22 @@ class RouteDB {
       return sqrt(pow(a.latitude - b.latitude, 2) + pow(a.longitude - b.longitude, 2));
     }
 
-    var stops =  await getNearbyStops(latLng);
+    var stopLoadRange = 0.006;
+    var stops =  await getNearbyStops(latLng, stopLoadRange: stopLoadRange);
+    while (stops == null || stops.isEmpty || stops.length < 10) {
+      stopLoadRange = stopLoadRange * 2;
+      print(stopLoadRange);
+      stops = await getNearbyStops(latLng, stopLoadRange: stopLoadRange);
+    }
+    print(stops);
     stops.sort((stopA, stopB) => getDistance(latLng, stopA.latLng).compareTo(getDistance(latLng, stopB.latLng)));
     return stops;
   }
 
   /// Retrieves the stops within the [stopLoadRange] of [latLng].
+  /// [stopLoadRange] is the latitude or longitude degrees in which to search
   Future<List<Stop>> getNearbyStops(LatLng latLng, { double stopLoadRange = 0.006 }) async {
     print("getNearbyStops");
-    final stopLoadRange = 0.006; // The range for which to load the stop markers
     Database db = await databaseFuture;
     var lat = latLng.latitude;
     var lng = latLng.longitude;
