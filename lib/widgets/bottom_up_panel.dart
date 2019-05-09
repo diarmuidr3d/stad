@@ -11,15 +11,12 @@ import 'package:stad/widgets/real_time_list.dart';
 import 'package:stad/widgets/slide_open_panel.dart';
 
 class BottomUpPanel extends StatefulWidget {
-  final Stop stop;
   final PanelController panelController;
-  final Function onHeightChanged;
   final Function onNearbyStopSelected;
 
   const BottomUpPanel({
     Key key,
-    @required this.stop,
-    this.panelController, this.onHeightChanged, this.onNearbyStopSelected
+    this.panelController, this.onNearbyStopSelected
   }) : super(key: key);
 
   @override
@@ -33,34 +30,25 @@ class BottomUpPanelState extends State<BottomUpPanel> {
   List<Stop> nearbyStops;
 
   @override
-  Widget build(BuildContext context) {
-    if((stopData == null || widget.stop != stopData.stop) && widget.stop != null ) {
-      isFavourite = false;
-      loading = true;
-      stopData = RealTimeStopData(stop: widget.stop);
-      Favourites().isFavourite(widget.stop.stopCode).then((isFav) => setState(() => isFavourite = isFav));
-      getTimings();
-    } else if (widget.stop == null && nearbyStops == null) {
-      var location = new Location();
-      location.getLocation().then((loc) {
-          print("nearby stops for location");
-          RouteDB().getNearbyStopsOrderedByDistance(LatLng(loc.latitude, loc.longitude)).then((list) {
-            setState(() => nearbyStops = list);
-          });
+  void initState() {
+    super.initState();
+    var location = new Location();
+    location.getLocation().then((loc) {
+      print("nearby stops for location");
+      RouteDB().getNearbyStopsOrderedByDistance(LatLng(loc.latitude, loc.longitude)).then((list) {
+        setState(() => nearbyStops = list);
       });
-    }
-    var initialHeight = 0.0;
-    if(widget.stop != null) initialHeight = 0.6;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return
       SlidingUpPanel(
         color: Colors.transparent,
         maxHeight: MediaQuery.of(context).size.height - 120,
         minHeight: 120,
-        initialHeight: initialHeight,
-        parallaxEnabled: true,
-        parallaxOffset: 0.5,
         controller: widget.panelController,
-        onHeightChanged: widget.onHeightChanged,
         panel: Container(
           decoration: BoxDecoration(
             border: Border.all(color: Styles.appPurple),
@@ -73,20 +61,7 @@ class BottomUpPanelState extends State<BottomUpPanel> {
 
   List<Widget> getBody() {
     var body = <Widget>[DragBar()];
-    if(widget.stop != null) {
-      body.addAll(<Widget>[
-        Row(children: <Widget>[
-          SizedBox(width: 10.0,),
-          Text(widget.stop.stopCode, style: Styles.routeNumberStyle,),
-          Expanded(child:
-            Text(" - ${widget.stop.address}", style: Styles.biggerFont, overflow: TextOverflow.ellipsis, maxLines: 1,),
-          ),
-          IconButton(icon: Icon(Icons.refresh), onPressed: getTimings,),
-          getFavIcon(),
-        ]),
-        Expanded(child: RealTimeList(loading: loading, stopData: stopData,)),
-      ]);
-    } else if (nearbyStops != null) {
+    if (nearbyStops != null) {
       body.addAll(<Widget>[
         Row(children: <Widget>[Spacer(), Text(Strings.nearbyStops, style: Styles.biggerFont,), Spacer(),]),
         Expanded(child: ListView.builder(
@@ -102,31 +77,6 @@ class BottomUpPanelState extends State<BottomUpPanel> {
       ]);
     }
     return body;
-  }
-
-  IconButton getFavIcon() {
-    return IconButton(
-        icon: isFavourite != null && isFavourite ? Icon(Icons.favorite, color: Colors.red,) : Icon(Icons.favorite_border,),
-        onPressed: () {
-          if (isFavourite == null || !isFavourite) {
-            Favourites().addFavourite(stopData.stop.stopCode);
-            setState(() => isFavourite = true);
-          } else {
-            Favourites().removeFavourite(stopData.stop.stopCode);
-            setState(() => isFavourite = false);
-          }
-        }
-    );
-  }
-
-  void getTimings() {
-    RealTimeUtilities.getStopTimings(widget.stop).then((stopData) {
-      setState(() {
-        this.stopData = stopData;
-        loading = false;
-      });
-//      Timer(Duration(seconds: 30), getTimings);
-    });
   }
 
 }

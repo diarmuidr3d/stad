@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:stad/models.dart';
 import 'package:stad/styles.dart';
 import 'package:stad/utilities.dart';
+import 'package:stad/utilities/map_icons.dart';
 import 'package:stad/widgets/fav_drawer.dart';
 
 class SearchStops extends StatelessWidget {
@@ -44,14 +45,15 @@ class StopResultState extends State<StopResult> {
   @override
   Widget build(BuildContext context) {
     if (widget.stop is Map) {
-      Favourites().isFavourite(widget.stop["stop_code"]).then((isFav) => setState(() => isFavourite = isFav));
+      final stop = Stop.fromMap(widget.stop);
+      Favourites().isFavourite(stop.stopCode).then((isFav) => setState(() => isFavourite = isFav));
       return ListTile(
-        leading: Text(widget.stop["stop_code"], style: Styles.routeNumberStyle,),
-        title: Text(widget.stop["address"]),
+        leading: Image.asset(MapIcons.markerFiles[stop.operator][IconType.Base]),
+        title: Row(children: <Widget>[Text(stop.stopCode, style: Styles.routeNumberStyle,), Text(stop.address)],),
         trailing: getFavIcon(),
-        onTap: () => widget.stopTapCallback(Stop.fromMap(widget.stop)),
+        onTap: () => widget.stopTapCallback(stop),
       );}
-    if (widget.stop is String) return FavListTile(stopCode: widget.stop, onTap: widget.stopTapCallback,);
+    else return FavListTile(stopCode: widget.stop, onTap: widget.stopTapCallback,); // If the stop is just a stopcode
   }
 
 

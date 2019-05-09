@@ -61,6 +61,7 @@ class DublinBusAPI implements RealTimeAPI {
         element.xpath('/MonitoredCall_ExpectedDepartureTime/text()')[0].name)
         .difference(DateTime.now()).inMinutes;
     details.inbound = element.xpath('/MonitoredVehicleJourney_DirectionRef/text()')[0].name == "Inbound" ? 1 : 0;
+    details.realTime = element.xpath('/MonitoredVehicleJourney_Monitored/text()')[0].name == "true" ? true : false;
     final journeyElement = element.xpath('/MonitoredVehicleJourney_VehicleRef/text()');
     if (journeyElement != null) details.journeyReference = journeyElement[0].name;
     return details;
@@ -152,7 +153,9 @@ class BusEireannAPI  implements RealTimeAPI {
         if (departureData == null) break; // TODO: handle arrivals
         final routeNum = await RouteDB().getRouteNumForApiNum(
             v["route_duid"]["duid"]);
-        final dueIn = DateTime.fromMillisecondsSinceEpoch(departureData["scheduled_passage_time_utc"] * 1000)
+        final realTime = departureData["actual_passage_time_utc"] != null;
+        final dueTime = realTime ? departureData["actual_passage_time_utc"] : departureData["scheduled_passage_time_utc"];
+        final dueIn = DateTime.fromMillisecondsSinceEpoch(dueTime * 1000)
             .difference(DateTime.now()).inMinutes;
         if (dueIn > 0)
           timings.add(Timing(
@@ -160,6 +163,7 @@ class BusEireannAPI  implements RealTimeAPI {
             heading: departureData["multilingual_direction_text"]["defaultValue"],
             journeyReference: v["trip_duid"]["duid"],
             route: routeNum,
+            realTime: realTime
           ));
       }
     }
@@ -218,7 +222,7 @@ class RealTimeUtilities {
         stopData.timings = await LuasAPI().getTimings(stop.stopCode);
         break;
     }
-    stopData.timings.sort((a, b) => a.dueMins.compareTo(b.dueMins));
+    if (stopData.timings != null) stopData.timings.sort((a, b) => a.dueMins.compareTo(b.dueMins));
     return stopData;
   }
 

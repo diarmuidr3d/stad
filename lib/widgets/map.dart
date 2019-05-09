@@ -9,6 +9,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'package:stad/keys.dart';
 import 'package:stad/utilities/database.dart';
+import 'package:stad/utilities/map_icons.dart';
 
 class TransitMap extends StatefulWidget {
   static const SOUTHWEST_BOUND = LatLng(51.294321, -10.576554);
@@ -16,112 +17,111 @@ class TransitMap extends StatefulWidget {
 
   final Completer<GoogleMapController> controller;
   final Function onStopTapped;
+  final bool interactionEnabled;
+  final Stop stopToShow;
+
+  final CameraPosition initialPosition;
 
   TransitMap({
     @required this.controller,
     @required this.onStopTapped,
+    @required this.interactionEnabled,
+    this.stopToShow,
+    this.initialPosition = const CameraPosition(
+      target: LatLng(53.3834, -8.2177501),
+      zoom: 7,
+    ),
   }) : super(key: Keys.map);
 
 
   @override
   State<StatefulWidget> createState() {
-    return TransitMapState();
+    return TransitMapState(currentPosition: initialPosition);
   }
 }
 
 class TransitMapState extends State<TransitMap> {
   Set<Marker> markers;
   final minimumZoom = 14; // The minimum zoom level required to see markers
-  static final initialPosition = CameraPosition(
-    target: LatLng(53.3834, -8.2177501),
-    zoom: 7,
-  );
-  var currentPosition = initialPosition;
+  var currentPosition;
   LatLng userPosition;
-  RouteDB db = new RouteDB();
-  final markerColours = {
-    Operator.DublinBus: BitmapDescriptor.hueYellow,
-    Operator.IarnrodEireann: BitmapDescriptor.hueGreen,
-    Operator.BusEireann: BitmapDescriptor.hueRed,
-    Operator.Luas: BitmapDescriptor.hueMagenta,
-  };
+  RouteDB db = RouteDB();
+  MapIcons mapIcons;
+
+  TransitMapState({
+    this.currentPosition
+  });
 
   @override
   void initState() {
     super.initState();
-    print("get location");
-    var locationListener = Location().onLocationChanged();
-    locationListener.first.then((loc) {
-      print("location got");
-      setState(() {
-        userPosition = LatLng(loc.latitude, loc.longitude);
-        currentPosition = CameraPosition(
-          target: userPosition,
-          zoom: 17,
-        );
+    if(widget.stopToShow == null) {
+      var locationListener = Location().onLocationChanged();
+      locationListener.first.then((loc) {
+        print("location got");
+        setState(() {
+          userPosition = LatLng(loc.latitude, loc.longitude);
+          currentPosition = CameraPosition(
+            target: userPosition,
+            zoom: 17,
+          );
+        });
+        moveCameraTo(userPosition);
       });
-      moveCameraTo(userPosition);
-    });
-    locationListener.listen((loc) {
-      print("listener got location");
-      userPosition = LatLng(loc.latitude, loc.longitude);
-    });
-  }
+      locationListener.listen((loc) {
+        print("listener got location");
+        userPosition = LatLng(loc.latitude, loc.longitude);
+      });
+    } else {
+      currentPosition = CameraPosition(target: widget.stopToShow.latLng, zoom: 17,);
+    }
+    }
 
   @override
   Widget build(BuildContext context) {
-    if (markers == null) _updateMarkers(currentPosition);
-    return Stack(children: <Widget>[
-    GoogleMap(
+    mapIcons = MapIcons(context: context);
+    if (markers == null) _updateMarkers(currentPosition, context);
+    return GoogleMap(
       initialCameraPosition: currentPosition,
       onMapCreated: (GoogleMapController controller) async {
         widget.controller.complete(controller);
         print("completed");
       },
+      rotateGesturesEnabled: widget.interactionEnabled,
+      scrollGesturesEnabled: widget.interactionEnabled,
+      tiltGesturesEnabled: widget.interactionEnabled,
+      zoomGesturesEnabled: widget.interactionEnabled,
+      myLocationButtonEnabled: widget.interactionEnabled,
       myLocationEnabled: true,
       compassEnabled: false,
       markers: markers,
       onCameraMove: (CameraPosition p) => currentPosition = p,
-      onCameraIdle: () => _updateMarkers(currentPosition),
+      onCameraIdle: () => _updateMarkers(currentPosition, context),
       cameraTargetBounds: CameraTargetBounds(LatLngBounds(southwest: TransitMap.SOUTHWEST_BOUND, northeast: TransitMap.NORTHEAST_BOUND)),
-    ),
-    Positioned(
-      top: 100,
-        right: 10,
-        child:
-    Container(
-      child: IconButton(icon: Icon(Icons.my_location), onPressed: () {
-        setState(() {
-          currentPosition = CameraPosition(target: userPosition, zoom: 17);
-        });
-        moveCameraTo(userPosition);
-      },),
-      decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.all(Radius.circular(35)),
-        border: Border.all(color: Colors.grey),
-      ),
-      width: 60,
-      height: 60,
-    ))
-    ],);
+    );
   }
 
   DateTime getNearbyStopsLastCalled;
 
-  void _updateMarkers(CameraPosition p) {
+  void _updateMarkers(CameraPosition p, BuildContext context) {
     getNearbyStopsLastCalled = DateTime.now();
     db.getNearbyStops(p.target).then((stops) {
-        var markerMapList = stops.map((stop) {
+        Iterable<Marker> markerMapList = stops.map((stop) {
+          var iconType = IconType.Base;
+          if (widget.stopToShow != null && stop.stopCode == widget.stopToShow.stopCode) iconType = IconType.Selected;
           return Marker(
-            icon: BitmapDescriptor.defaultMarkerWithHue(
-                markerColours[stop.operator]),
+            icon: mapIcons.getMarkerIconForOperatorAndType(stop.operator, iconType, context),
             markerId: MarkerId(stop.stopCode),
             position: stop.latLng,
             infoWindow: InfoWindow(title: stop.stopCode,
                 snippet: stop.address,
             ),
-            onTap: () => _tapMarker(stop),
+            onTap: widget.interactionEnabled ?
+                () => _tapMarker(stop)
+                :
+                null
+            ,
+            consumeTapEvents: !widget.interactionEnabled,
           );
         });
         setState(() {
