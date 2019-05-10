@@ -28,34 +28,47 @@ class SearchAppBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppBar(
       automaticallyImplyLeading: false,
-      title: Container(
-        child: Row(children: <Widget>[
-          getIcon(context),
-          Expanded(child: TextField(
-            controller: textFieldController,
-            key: Keys.searchField,
-            autofocus: searching,
-            enabled: !searching,
-            decoration: InputDecoration(
-                hintText: Strings.search,
-                border: InputBorder.none,
-            ),
-            onTap: () => onTapCallback(),
-            onChanged: (string) => handleInputCallback(string),
-          )),
-        ],),
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey),
-          color: Colors.white,
-          borderRadius: BorderRadius.all(Radius.circular(10.0)),
-        ),
-      ),
+      title: buildSearchAppBarTitle(context, textFieldController, searching, viewingStop, backCallback, onTapCallback, handleInputCallback, scaffoldKey),
       backgroundColor: Colors.transparent, //No more green
       elevation: 0.0, //Shadow gone
     );
   }
+  
+  static Widget buildSearchAppBarTitle(
+      BuildContext context,
+      TextEditingController textController,
+      bool searching,
+      bool viewingStop,
+      Function backCallback,
+      Function onTapCallback,
+      Function handleInputCallback,
+      scaffoldKey)
+  {
+    return Container(
+      child: Row(children: <Widget>[
+        _getIcon(context, searching, viewingStop, backCallback, scaffoldKey),
+        Expanded(child: TextField(
+          controller: textController,
+          key: Keys.searchField,
+          autofocus: searching,
+          enabled: !searching,
+          decoration: InputDecoration(
+            hintText: Strings.search,
+            border: InputBorder.none,
+          ),
+          onTap: () => onTapCallback(),
+          onChanged: (string) => handleInputCallback(string),
+        )),
+      ],),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey),
+        color: Colors.white,
+        borderRadius: BorderRadius.all(Radius.circular(10.0)),
+      ),
+    );
+  }
 
-  IconButton getIcon(context) {
+  static IconButton _getIcon(BuildContext context, bool searching, bool viewingStop, Function backCallback, scaffoldKey) {
     if (searching || viewingStop) {
       return IconButton(icon: Icon(Icons.arrow_back),
         onPressed: () {

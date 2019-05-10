@@ -17,10 +17,8 @@ class SearchStops extends StatelessWidget {
         Container()
     :
     ListView.builder(
-      itemCount: stops.length * 2 + 1,
+      itemCount: stops.length * 2,
       itemBuilder: (context, index) {
-        if (index == 0) return ListTile(); // Add a tile to the start until we figure out how to make the list start after the appbar
-        index--;
         if (index % 2 == 1) return Divider(); // add a divider in between each item
         index = index ~/ 2;
         return StopResult(stop: stops[index], stopTapCallback: stopTapCallback,);
