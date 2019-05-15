@@ -101,11 +101,8 @@ class TransitMapState extends State<TransitMap> {
     );
   }
 
-  DateTime getNearbyStopsLastCalled;
-
   void _updateMarkers(CameraPosition p, BuildContext context) {
-    getNearbyStopsLastCalled = DateTime.now();
-    db.getNearbyStops(p.target).then((stops) {
+    db.getNearbyStopsIteratingRange(p.target).then((stops) {
         Iterable<Marker> markerMapList = stops.map((stop) {
           var iconType = IconType.Base;
           if (widget.stopToShow != null && stop.stopCode == widget.stopToShow.stopCode) iconType = IconType.Selected;

@@ -94,7 +94,13 @@ class RouteDB {
     double getDistance(LatLng a, LatLng b) {
       return sqrt(pow(a.latitude - b.latitude, 2) + pow(a.longitude - b.longitude, 2));
     }
+    var stops = await getNearbyStopsIteratingRange(latLng);
+    stops.sort((stopA, stopB) => getDistance(latLng, stopA.latLng).compareTo(getDistance(latLng, stopB.latLng)));
+    return stops;
+  }
 
+  /// Gets at least the ten nearest stops to [latLng] by iterating through the range, the range is doubled each time
+  Future<List<Stop>> getNearbyStopsIteratingRange(LatLng latLng) async {
     var stopLoadRange = 0.006;
     var stops =  await getNearbyStops(latLng, stopLoadRange: stopLoadRange);
     while (stops == null || stops.isEmpty || stops.length < 10) {
@@ -102,8 +108,6 @@ class RouteDB {
       print(stopLoadRange);
       stops = await getNearbyStops(latLng, stopLoadRange: stopLoadRange);
     }
-    print(stops);
-    stops.sort((stopA, stopB) => getDistance(latLng, stopA.latLng).compareTo(getDistance(latLng, stopB.latLng)));
     return stops;
   }
 
