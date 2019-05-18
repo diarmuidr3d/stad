@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -12,12 +13,11 @@ import 'package:stad/utilities/database.dart';
 import 'package:stad/utilities/favourites.dart';
 import 'package:stad/views/search.dart';
 import 'package:stad/views/stop.dart';
+import 'package:stad/widgets/bottom_up_panel.dart';
 import 'package:stad/widgets/fav_drawer.dart';
 import 'package:stad/widgets/search_app_bar.dart';
 import 'package:stad/widgets/search_stops.dart';
-import 'package:stad/widgets/slide_open_panel.dart';
 import 'package:stad/widgets/map.dart';
-import 'package:stad/widgets/bottom_up_panel.dart';
 
 import '../styles.dart';
 
@@ -31,7 +31,6 @@ class HomeState extends State<Home> {
   List searchedStops;
   Stop selectedStop;
   final TextEditingController searchFieldController = TextEditingController();
-  final PanelController _panelController = PanelController();
   var mapCompleter = Completer<GoogleMapController>();
   var nearbyStops = <Stop>[];
 
@@ -58,16 +57,35 @@ class HomeState extends State<Home> {
         Container(
           height: MediaQuery.of(context).size.height,
           child:
-        ListView.builder(
-          padding: EdgeInsets.only(left: 5, right: 5),
-          itemCount: nearbyStops.length + 1,
-          itemBuilder: (context, index) {
-            if (index == 0) return Container(
-              height: MediaQuery.of(context).size.height / 2,
-              child: TransitMap(controller: mapCompleter, onStopTapped: viewStop, interactionEnabled: true),
-            );
-            else return StopResult(stop: nearbyStops[index], stopTapCallback: viewStop,);
-        })),
+        ListView(
+          padding: EdgeInsets.all(0),
+          children: <Widget>[
+            SizedBox(
+              height: MediaQuery.of(context).size.height * 0.75,
+              child: TransitMap(
+                controller: mapCompleter,
+                onStopTapped: viewStop,
+                interactionEnabled: true,
+                gestureRecognizers: Set.from([
+                  Factory<PanGestureRecognizer>(() => PanGestureRecognizer()),
+                  Factory<VerticalDragGestureRecognizer>(() => VerticalDragGestureRecognizer()),
+                  Factory<HorizontalDragGestureRecognizer>(() => HorizontalDragGestureRecognizer()),
+                  Factory<ScaleGestureRecognizer>(() => ScaleGestureRecognizer())
+                ]),
+              ),
+            ),
+            DragBar(),
+            Row(children: <Widget>[Spacer(), Text(Strings.nearbyStops, style: Styles.biggerFont,), Spacer(),]),
+            ListView.builder(
+              physics: const NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              padding: EdgeInsets.all(0),
+              itemCount: nearbyStops.length,
+              itemBuilder: (context, index) => StopResult(stop: nearbyStops[index], stopTapCallback: viewStop,)
+            ),
+        ],
+        ),
+    ),
         Positioned(
             top: 0.0,
             left: 0.0,

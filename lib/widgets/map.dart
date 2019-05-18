@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:stad/models.dart';
 
@@ -22,6 +23,8 @@ class TransitMap extends StatefulWidget {
 
   final CameraPosition initialPosition;
 
+  final Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers;
+
   TransitMap({
     @required this.controller,
     @required this.onStopTapped,
@@ -31,6 +34,7 @@ class TransitMap extends StatefulWidget {
       target: LatLng(53.3834, -8.2177501),
       zoom: 7,
     ),
+    this.gestureRecognizers,
   }) : super(key: Keys.map);
 
 
@@ -98,6 +102,7 @@ class TransitMapState extends State<TransitMap> {
       onCameraMove: (CameraPosition p) => currentPosition = p,
       onCameraIdle: () => _updateMarkers(currentPosition, context),
       cameraTargetBounds: CameraTargetBounds(LatLngBounds(southwest: TransitMap.SOUTHWEST_BOUND, northeast: TransitMap.NORTHEAST_BOUND)),
+      gestureRecognizers: widget.gestureRecognizers,
     );
   }
 
