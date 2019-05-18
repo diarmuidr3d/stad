@@ -52,6 +52,7 @@ class StopResultState extends State<StopResult> {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Text(stop.stopCode, style: Styles.routeNumberStyle,),
+          SizedBox(width: 5,),
           Expanded(child:Text(stop.address, overflow: TextOverflow.ellipsis, maxLines: 1,) ),
         ],),
       trailing: getFavIcon(),
