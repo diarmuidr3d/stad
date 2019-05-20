@@ -80,7 +80,7 @@ class HomeState extends State<Home> {
               physics: const NeverScrollableScrollPhysics(),
               shrinkWrap: true,
               padding: EdgeInsets.all(0),
-              itemCount: nearbyStops.length,
+              itemCount: nearbyStops.length < 10 ? nearbyStops.length : 10,
               itemBuilder: (context, index) => StopResult(stop: nearbyStops[index], stopTapCallback: viewStop,)
             ),
         ],
