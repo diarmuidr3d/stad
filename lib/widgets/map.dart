@@ -47,7 +47,7 @@ class TransitMap extends StatefulWidget {
 class TransitMapState extends State<TransitMap> {
   Set<Marker> markers;
   final minimumZoom = 14; // The minimum zoom level required to see markers
-  var currentPosition;
+  CameraPosition currentPosition;
   LatLng userPosition;
   RouteDB db = RouteDB();
   MapIcons mapIcons;
@@ -85,25 +85,46 @@ class TransitMapState extends State<TransitMap> {
   Widget build(BuildContext context) {
     mapIcons = MapIcons(context: context);
     if (markers == null) _updateMarkers(currentPosition, context);
-    return GoogleMap(
-      initialCameraPosition: currentPosition,
-      onMapCreated: (GoogleMapController controller) async {
-        widget.controller.complete(controller);
-        print("completed");
-      },
-      rotateGesturesEnabled: widget.interactionEnabled,
-      scrollGesturesEnabled: widget.interactionEnabled,
-      tiltGesturesEnabled: widget.interactionEnabled,
-      zoomGesturesEnabled: widget.interactionEnabled,
-      myLocationButtonEnabled: widget.interactionEnabled,
-      myLocationEnabled: true,
-      compassEnabled: false,
-      markers: markers,
-      onCameraMove: (CameraPosition p) => currentPosition = p,
-      onCameraIdle: () => _updateMarkers(currentPosition, context),
-      cameraTargetBounds: CameraTargetBounds(LatLngBounds(southwest: TransitMap.SOUTHWEST_BOUND, northeast: TransitMap.NORTHEAST_BOUND)),
-      gestureRecognizers: widget.gestureRecognizers,
-    );
+    return Stack(children: <Widget>[
+      GoogleMap(
+        initialCameraPosition: currentPosition,
+        onMapCreated: (GoogleMapController controller) async {
+          widget.controller.complete(controller);
+        },
+        rotateGesturesEnabled: widget.interactionEnabled,
+        scrollGesturesEnabled: widget.interactionEnabled,
+        tiltGesturesEnabled: widget.interactionEnabled,
+        zoomGesturesEnabled: widget.interactionEnabled,
+        myLocationButtonEnabled: false,
+        myLocationEnabled: true,
+        compassEnabled: false,
+        markers: markers,
+        onCameraMove: (CameraPosition p) => currentPosition = p,
+        onCameraIdle: () => _updateMarkers(currentPosition, context),
+        cameraTargetBounds: CameraTargetBounds(LatLngBounds(southwest: TransitMap.SOUTHWEST_BOUND, northeast: TransitMap.NORTHEAST_BOUND)),
+        gestureRecognizers: widget.gestureRecognizers,
+      ),
+      if (widget.interactionEnabled) Positioned(
+        right: 10,
+        bottom: 10,
+        child: Container(
+          width: 56,
+          height: 56,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.all(Radius.circular(28)),
+            border: Border.all(color: Colors.grey, width: 1)
+          ),
+          child: IconButton(
+              icon: Icon(Icons.my_location),
+              onPressed: () {
+                print(userPosition);
+                moveCameraTo(userPosition);
+              }
+          ),
+        ),
+      ),
+    ],);
   }
 
   void _updateMarkers(CameraPosition p, BuildContext context) {
@@ -141,7 +162,7 @@ class TransitMapState extends State<TransitMap> {
   void moveCameraTo(LatLng latLng) {
     widget.controller.future.then((controller) {
       print("animated camera");
-      controller.animateCamera(CameraUpdate.newCameraPosition(currentPosition));
+      controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(target: latLng, zoom: currentPosition.zoom)));
     });
   }
 }
