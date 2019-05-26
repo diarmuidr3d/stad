@@ -33,6 +33,12 @@ class HomeState extends State<Home> {
   final TextEditingController searchFieldController = TextEditingController();
   var mapCompleter = Completer<GoogleMapController>();
   var nearbyStops = <Stop>[];
+  final Set<Factory<OneSequenceGestureRecognizer>> mapGestureRecognizers = Set.from([
+    Factory<PanGestureRecognizer>(() => PanGestureRecognizer()),
+    Factory<VerticalDragGestureRecognizer>(() => VerticalDragGestureRecognizer()),
+    Factory<HorizontalDragGestureRecognizer>(() => HorizontalDragGestureRecognizer()),
+    Factory<ScaleGestureRecognizer>(() => ScaleGestureRecognizer())
+  ]);
 
   @override
   void initState() {
@@ -63,12 +69,7 @@ class HomeState extends State<Home> {
                 controller: mapCompleter,
                 onStopTapped: viewStop,
                 interactionEnabled: true,
-                gestureRecognizers: Set.from([
-                  Factory<PanGestureRecognizer>(() => PanGestureRecognizer()),
-                  Factory<VerticalDragGestureRecognizer>(() => VerticalDragGestureRecognizer()),
-                  Factory<HorizontalDragGestureRecognizer>(() => HorizontalDragGestureRecognizer()),
-                  Factory<ScaleGestureRecognizer>(() => ScaleGestureRecognizer())
-                ]),
+                gestureRecognizers: mapGestureRecognizers,
               ),
             ),
             DragBar(),

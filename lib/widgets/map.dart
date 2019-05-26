@@ -80,7 +80,6 @@ class TransitMapState extends State<TransitMap> {
   @override
   Widget build(BuildContext context) {
     mapIcons = MapIcons(context: context);
-    if (markers == null) _updateMarkers(currentPosition, context);
     return Stack(children: <Widget>[
       GoogleMap(
         initialCameraPosition: currentPosition,
