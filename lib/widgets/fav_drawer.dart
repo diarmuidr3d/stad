@@ -16,6 +16,7 @@ class FavDrawer extends StatefulWidget {
 
 class FavDrawerState extends State<FavDrawer> {
   List<String> favourites;
+  var loading = true;
 
   @override
   void initState() {
@@ -27,22 +28,34 @@ class FavDrawerState extends State<FavDrawer> {
   @override
   Widget build(BuildContext context) {
     var child;
-    if(favourites == null) child = Center( child: CircularProgressIndicator());
-    else child = ListView.builder(
-        padding: const EdgeInsets.all(16.0),
-        itemCount: favourites.length + 2,
-        itemBuilder: (context, i) {
-          if (i == 0) return ListTile(title: Text(Strings.myFavourites, style: Styles.biggerFont,),);
-          else if (i == 1) return Divider();
-          else {
-            i = i-2;
-            return FavListTile(stopCode: favourites[i], onTap: widget.onStopTap);
-          }
-        },);
+    if(loading == true) child = Center( child: CircularProgressIndicator());
+    else child = ListView(
+      padding: const EdgeInsets.all(16.0),
+      children: <Widget>[
+        ListTile(title: Text(Strings.myFavourites, style: Styles.biggerFont,),),
+        Divider(),
+        if (favourites == null) ListTile(title: Text("Add a favourite to see it listed here")),
+        if (favourites != null)
+          ListView.builder(
+            shrinkWrap: true,
+            padding: EdgeInsets.all(0),
+            itemCount: favourites.length,
+            physics: NeverScrollableScrollPhysics(),
+            itemBuilder: (context, i) {
+              return FavListTile(stopCode: favourites[i], onTap: widget.onStopTap);
+            },
+          ),
+      ],
+    );
     return Drawer(child: child);
   }
 
-  void _setFavs(favs) => setState(() => favourites = favs);
+  void _setFavs(favs) {
+    setState(() {
+      loading = false;
+      favourites = favs;
+    });
+  }
 
 }
 
@@ -80,8 +93,10 @@ class FavListTileState extends State<FavListTile> {
         trailing: getFavIcon(),
       );
     } else {
+      final leading = stop.operator == Operator.DublinBus ?
+          Text(stop.stopCode, style: Styles.routeNumberStyle,) : null;
       return ListTile(
-        leading: Text(stop.stopCode, style: Styles.routeNumberStyle,),
+        leading: leading,
         title: Text(stop.address),
         trailing: getFavIcon(),
         onTap: () => widget.onTap(stop),
