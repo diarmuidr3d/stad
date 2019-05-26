@@ -59,31 +59,30 @@ class HomeState extends State<Home> {
       body: Stack(children: <Widget>[
         Container(
           height: MediaQuery.of(context).size.height,
-          child:
-        ListView(
-          padding: EdgeInsets.all(0),
-          children: <Widget>[
-            SizedBox(
-              height: MediaQuery.of(context).size.height * 0.75,
-              child: TransitMap(
-                controller: mapCompleter,
-                onStopTapped: viewStop,
-                interactionEnabled: true,
-                gestureRecognizers: mapGestureRecognizers,
+          child: ListView(
+            padding: EdgeInsets.all(0),
+            children: <Widget>[
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.75,
+                child: TransitMap(
+                  controller: mapCompleter,
+                  onStopTapped: viewStop,
+                  interactionEnabled: true,
+                  gestureRecognizers: mapGestureRecognizers,
+                ),
               ),
-            ),
-            DragBar(),
-            Row(children: <Widget>[Spacer(), Text(Strings.nearbyStops, style: Styles.biggerFont,), Spacer(),]),
-            ListView.builder(
-              physics: const NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
-              padding: EdgeInsets.all(0),
-              itemCount: nearbyStops.length < 10 ? nearbyStops.length : 10,
-              itemBuilder: (context, index) => StopResult(stop: nearbyStops[index], stopTapCallback: viewStop,)
-            ),
-        ],
+              DragBar(),
+              Row(children: <Widget>[Spacer(), Text(Strings.nearbyStops, style: Styles.biggerFont,), Spacer(),]),
+              ListView.builder(
+                physics: const NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                padding: EdgeInsets.all(0),
+                itemCount: nearbyStops.length < 10 ? nearbyStops.length : 10,
+                itemBuilder: (context, index) => StopResult(stop: nearbyStops[index], stopTapCallback: viewStop,)
+              ),
+            ],
+          ),
         ),
-    ),
         Positioned(
             top: 0.0,
             left: 0.0,
