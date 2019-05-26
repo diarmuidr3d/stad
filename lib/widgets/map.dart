@@ -4,8 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:stad/models.dart';
+import 'package:stad/utilities/location_manager.dart';
 
-import 'package:location/location.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'package:stad/keys.dart';
@@ -59,22 +59,18 @@ class TransitMapState extends State<TransitMap> {
   @override
   void initState() {
     super.initState();
+    /// If we're just showing the stop, we just want a static view, so don't care for user's location
     if(widget.stopToShow == null) {
-      var locationListener = Location().onLocationChanged();
-      locationListener.first.then((loc) {
-        print("location got");
-        setState(() {
-          userPosition = LatLng(loc.latitude, loc.longitude);
+      LocationManager().getLocationListener().then((locationListener){
+        locationListener.first.then((loc) {
+          userPosition = loc;
           currentPosition = CameraPosition(
             target: userPosition,
             zoom: 17,
           );
+          moveCameraTo(userPosition);
         });
-        moveCameraTo(userPosition);
-      });
-      locationListener.listen((loc) {
-        print("listener got location");
-        userPosition = LatLng(loc.latitude, loc.longitude);
+        locationListener.listen((loc) => userPosition = loc);
       });
     } else {
       currentPosition = CameraPosition(target: widget.stopToShow.latLng, zoom: 17,);
@@ -148,6 +144,7 @@ class TransitMapState extends State<TransitMap> {
           );
         });
         setState(() {
+          print("setting markers");
           markers = markerMapList.toSet();
           currentPosition = p;
         });

@@ -4,11 +4,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:location/location.dart';
 
 import 'package:stad/keys.dart';
 import 'package:stad/models.dart';
 import 'package:stad/resources/strings.dart';
+import 'package:stad/utilities/location_manager.dart';
 import 'package:stad/utilities/database.dart';
 import 'package:stad/utilities/favourites.dart';
 import 'package:stad/views/search.dart';
@@ -39,12 +39,9 @@ class HomeState extends State<Home> {
     super.initState();
     Favourites().getFavourites().then((favs) =>
         setState(() => currentFavourites = favs));
-    var location = new Location();
-    location.getLocation().then((loc) {
-      print("nearby stops for location");
-      RouteDB().getNearbyStopsOrderedByDistance(LatLng(loc.latitude, loc.longitude)).then((list) {
-        setState(() => nearbyStops = list);
-      });
+    LocationManager().getLocation().then((LatLng loc) async {
+      final stops = await RouteDB().getNearbyStopsOrderedByDistance(loc);
+      setState(() => nearbyStops = stops);
     });
   }
 
