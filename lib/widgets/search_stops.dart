@@ -3,7 +3,6 @@ import 'package:stad/models.dart';
 import 'package:stad/styles.dart';
 import 'package:stad/utilities/favourites.dart';
 import 'package:stad/utilities/map_icons.dart';
-import 'package:stad/widgets/fav_drawer.dart';
 
 class SearchStops extends StatelessWidget {
   final List stops;
@@ -42,16 +41,17 @@ class StopResultState extends State<StopResult> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.stop is String) return FavListTile(stopCode: widget.stop, onTap: widget.stopTapCallback,); // If the stop is just a stopcode
-    var stop = widget.stop;
-    if (stop is Map) stop = Stop.fromMap(stop);
+//    if (widget.stop is String) return FavListTile(stopCode: widget.stop, onTap: widget.stopTapCallback,); // If the stop is just a stopcode
+    Stop stop;
+    if (widget.stop is Map) stop = Stop.fromMap(widget.stop);
+    else stop = widget.stop;
     Favourites().isFavourite(stop.stopCode).then((isFav) => setState(() => isFavourite = isFav));
     return ListTile(
       leading: Image.asset(MapIcons.markerFiles[stop.operator][IconType.Base]),
       title: Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          Text(stop.stopCode, style: Styles.routeNumberStyle,),
+          if(stop.operator == Operator.DublinBus) Text(stop.stopCode, style: Styles.routeNumberStyle,),
           SizedBox(width: 5,),
           Expanded(child:Text(stop.address, overflow: TextOverflow.ellipsis, maxLines: 1,) ),
         ],),
