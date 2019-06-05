@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:stad/keys.dart';
-import 'package:stad/resources/strings.dart';
 import 'package:stad/utilities/database.dart';
 import 'package:stad/views/stop.dart';
 import 'package:stad/widgets/search_app_bar.dart';
@@ -29,11 +28,9 @@ class SearchViewState extends State<SearchView> {
               context,
               textController,
               true,
-              false,
-              () => Navigator.pop(context),
               null,
-              searchForStopMatching,
-              Keys.searchScaffoldKey),
+              searchForStopMatching
+          ),
           backgroundColor: Colors.transparent, //No more green
           elevation: 0.0, //Shadow gone
         ),

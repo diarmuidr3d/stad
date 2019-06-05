@@ -30,7 +30,7 @@ class SearchAppBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppBar(
       automaticallyImplyLeading: false,
-      title: buildSearchAppBarTitle(context, textFieldController, searching, viewingStop, backCallback, onTapCallback, handleInputCallback, scaffoldKey),
+      title: buildSearchAppBarTitle(context, textFieldController, searching, onTapCallback, handleInputCallback),
       backgroundColor: Colors.transparent, //No more green
       elevation: 0.0, // means no shadow
       brightness: Brightness.light
@@ -41,16 +41,13 @@ class SearchAppBar extends StatelessWidget {
       BuildContext context,
       TextEditingController textController,
       bool searching,
-      bool viewingStop,
-      Function backCallback,
       Function onTapCallback,
       Function handleInputCallback,
-      scaffoldKey)
+      )
   {
-    print("searching $searching");
     return Container(
       child: Row(children: <Widget>[
-        _getIcon(context, searching, viewingStop, backCallback, scaffoldKey),
+        _getIcon(context),
         Expanded(child: TextField(
           controller: textController,
           key: Keys.searchField,
@@ -72,7 +69,7 @@ class SearchAppBar extends StatelessWidget {
     );
   }
 
-  static Widget _getIcon(BuildContext context, bool searching, bool viewingStop, Function backCallback, scaffoldKey) {
+  static Widget _getIcon(BuildContext context) {
     final ModalRoute<dynamic> parentRoute = ModalRoute.of(context);
     final bool canPop = parentRoute?.canPop ?? false;
     if (canPop) {
