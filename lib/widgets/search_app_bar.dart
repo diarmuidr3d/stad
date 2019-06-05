@@ -30,25 +30,36 @@ class SearchAppBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppBar(
       automaticallyImplyLeading: false,
-      title: buildSearchAppBarTitle(context, textFieldController, searching, onTapCallback, handleInputCallback),
+      title: SearchWidget(
+          textController: textFieldController,
+          searching: searching,
+          onTapCallback: onTapCallback,
+          handleInputCallback: handleInputCallback),
       backgroundColor: Colors.transparent, //No more green
       elevation: 0.0, // means no shadow
       brightness: Brightness.light
     );
   }
-  
-  static Widget buildSearchAppBarTitle(
-      BuildContext context,
-      TextEditingController textController,
-      bool searching,
-      Function onTapCallback,
-      Function handleInputCallback,
-      )
-  {
+
+}
+
+class SearchWidget extends StatelessWidget {
+  final TextEditingController textController;
+  final bool searching;
+  final Function onTapCallback;
+  final Function handleInputCallback;
+
+  /// Builds a box with rounded edges containing an Icon button on the left and a [SearchText] on the right.
+  /// The button is either a menu icon to open the drawer or a back button.
+  /// All the parms are for passing to [SearchText].
+  const SearchWidget({this.textController, this.searching, this.onTapCallback, this.handleInputCallback});
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       child: Row(children: <Widget>[
         _getIcon(context),
-        Expanded(child: SearchAppBarText(
+        Expanded(child: SearchText(
           editable: searching,
           onInput: handleInputCallback,
           onTapCallback: onTapCallback,
@@ -63,7 +74,7 @@ class SearchAppBar extends StatelessWidget {
     );
   }
 
-  static Widget _getIcon(BuildContext context) {
+  Widget _getIcon(BuildContext context) {
     final ModalRoute<dynamic> parentRoute = ModalRoute.of(context);
     final bool canPop = parentRoute?.canPop ?? false;
     if (canPop) {
@@ -77,10 +88,10 @@ class SearchAppBar extends StatelessWidget {
       );
     }
   }
-
+  
 }
 
-class SearchAppBarText extends StatelessWidget {
+class SearchText extends StatelessWidget {
   final bool editable;
   final Function onTapCallback;
   final TextEditingController textController;
@@ -90,8 +101,7 @@ class SearchAppBarText extends StatelessWidget {
   /// [onTapCallback] is only used if not [editable] and is called when the widget is tapped.
   /// [textController] is only used when [editable], it's so the text in the [TextField] isn't lost.
   /// [onInput] is also only used when [editable], it is called for each change in input text.
-  const SearchAppBarText({
-    Key key,
+  const SearchText({
     this.editable,
     this.onTapCallback, 
     this.textController, 

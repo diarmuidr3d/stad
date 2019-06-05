@@ -24,14 +24,12 @@ class SearchViewState extends State<SearchView> {
         key: Keys.searchScaffoldKey,
         appBar: AppBar(
           automaticallyImplyLeading: false,
-          title: SearchAppBar.buildSearchAppBarTitle(
-              context,
-              textController,
-              true,
-              null,
-              searchForStopMatching
+          title: SearchWidget(
+            textController: textController,
+            handleInputCallback: searchForStopMatching,
+            searching: true,
           ),
-          backgroundColor: Colors.transparent, //No more green
+          backgroundColor: Colors.transparent,
           elevation: 0.0, //Shadow gone
         ),
         body: Stack(children: <Widget>[
