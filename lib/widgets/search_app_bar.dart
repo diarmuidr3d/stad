@@ -48,18 +48,12 @@ class SearchAppBar extends StatelessWidget {
     return Container(
       child: Row(children: <Widget>[
         _getIcon(context),
-        Expanded(child: TextField(
-          controller: textController,
-          key: Keys.searchField,
-          autofocus: searching,
-          enableInteractiveSelection: searching,
-          decoration: InputDecoration(
-            hintText: Strings.search,
-            border: InputBorder.none,
-          ),
-          onTap: onTapCallback,
-          onChanged: (string) => handleInputCallback(string),
-        )),
+        Expanded(child: SearchAppBarText(
+          editable: searching,
+          onInput: handleInputCallback,
+          onTapCallback: onTapCallback,
+          textController: textController,
+        ),),
       ],),
       decoration: BoxDecoration(
         border: Border.all(color: Colors.grey),
@@ -84,4 +78,48 @@ class SearchAppBar extends StatelessWidget {
     }
   }
 
+}
+
+class SearchAppBarText extends StatelessWidget {
+  final bool editable;
+  final Function onTapCallback;
+  final TextEditingController textController;
+  final Function onInput;
+
+  /// Creates either a [TextField] or a [Text] depending on the [editable] parameter.
+  /// [onTapCallback] is only used if not [editable] and is called when the widget is tapped.
+  /// [textController] is only used when [editable], it's so the text in the [TextField] isn't lost.
+  /// [onInput] is also only used when [editable], it is called for each change in input text.
+  const SearchAppBarText({
+    Key key,
+    this.editable,
+    this.onTapCallback, 
+    this.textController, 
+    this.onInput,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if(editable) {
+      return TextField(
+        controller: textController,
+        key: Keys.searchField,
+        autofocus: true,
+        decoration: InputDecoration(
+          hintText: Strings.search,
+          border: InputBorder.none,
+        ),
+        onChanged: onInput,
+      );
+    } else {
+      return GestureDetector(
+        child: Text(Strings.search, style: _getInlineStyle(Theme.of(context)),),
+        onTap: onTapCallback,
+      );
+    }
+  }
+
+  TextStyle _getInlineStyle(ThemeData themeData) {
+    return themeData.textTheme.subhead.copyWith(color: themeData.hintColor);
+  }
 }
