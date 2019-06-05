@@ -6,7 +6,6 @@ import 'package:stad/models.dart';
 import 'package:stad/styles.dart';
 import 'package:stad/utilities/real_time_apis.dart';
 import 'package:stad/utilities/favourites.dart';
-import 'package:stad/views/search.dart';
 import 'package:stad/widgets/map.dart';
 import 'package:stad/widgets/real_time_list.dart';
 import 'package:stad/widgets/search_app_bar.dart';
@@ -79,8 +78,6 @@ class StopViewState extends State<StopView> {
                 scaffoldKey: Keys.viewStopScaffoldKey,
                 onTapCallback: () => startSearching(context),
                 searching: false,
-                viewingStop: true,
-                backCallback: () {Navigator.pop(context);},
                 handleInputCallback: () {},
                 textFieldController: textController,
               )
@@ -90,7 +87,7 @@ class StopViewState extends State<StopView> {
   }
 
   void startSearching(BuildContext context) {
-    Navigator.push(context, MaterialPageRoute(builder: (context) => SearchView()));
+    Navigator.pop(context);
   }
 
   void getTimings(Stop stop) async {

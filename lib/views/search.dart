@@ -20,6 +20,7 @@ class SearchViewState extends State<SearchView> {
 
   @override
   Widget build(BuildContext context) {
+    FocusNode searchFocusNode = FocusNode();
     return Scaffold(
         key: Keys.searchScaffoldKey,
         appBar: AppBar(
@@ -28,14 +29,16 @@ class SearchViewState extends State<SearchView> {
             textController: textController,
             handleInputCallback: searchForStopMatching,
             searching: true,
+            editableFocusNode: searchFocusNode,
           ),
           backgroundColor: Colors.transparent,
           elevation: 0.0, //Shadow gone
         ),
         body: Stack(children: <Widget>[
           Container(
-              child: SearchStops(stops: searchedStops, stopTapCallback: (stop){
-                Navigator.push(context, MaterialPageRoute(builder: (context) => StopView(stop: stop,)));
+              child: SearchStops(stops: searchedStops, stopTapCallback: (stop) async {
+                bool focus = await Navigator.push(context, MaterialPageRoute(builder: (context) => StopView(stop: stop,)));
+                if (focus == true|| focus==null) FocusScope.of(context).requestFocus(searchFocusNode);
                 },),
               decoration: BoxDecoration(color: Colors.white,)
           ),

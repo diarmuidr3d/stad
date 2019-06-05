@@ -91,8 +91,6 @@ class HomeState extends State<Home> {
               scaffoldKey: Keys.homeScaffoldKey,
               onTapCallback: () => startSearching(context),
               searching: false,
-              viewingStop: false,
-              backCallback: () {},
               handleInputCallback: () {},
               textFieldController: searchFieldController,
             )

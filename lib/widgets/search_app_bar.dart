@@ -10,8 +10,6 @@ class SearchAppBar extends StatelessWidget {
   final scaffoldKey;
   final Function onTapCallback;
   final bool searching;
-  final bool viewingStop;
-  final Function backCallback;
   final Function handleInputCallback;
   final TextEditingController textFieldController;
 
@@ -20,10 +18,8 @@ class SearchAppBar extends StatelessWidget {
     @required this.scaffoldKey,
     @required this.onTapCallback,
     @required this.searching,
-    @required this.viewingStop,
-    @required this.backCallback,
     @required this.handleInputCallback,
-    @required this.textFieldController
+    @required this.textFieldController,
   }) : super(key: key);
 
   @override
@@ -48,11 +44,12 @@ class SearchWidget extends StatelessWidget {
   final bool searching;
   final Function onTapCallback;
   final Function handleInputCallback;
+  final FocusNode editableFocusNode;
 
   /// Builds a box with rounded edges containing an Icon button on the left and a [SearchText] on the right.
   /// The button is either a menu icon to open the drawer or a back button.
   /// All the parms are for passing to [SearchText].
-  const SearchWidget({this.textController, this.searching, this.onTapCallback, this.handleInputCallback});
+  const SearchWidget({this.textController, this.searching, this.onTapCallback, this.handleInputCallback, this.editableFocusNode});
 
   @override
   Widget build(BuildContext context) {
@@ -64,6 +61,7 @@ class SearchWidget extends StatelessWidget {
           onInput: handleInputCallback,
           onTapCallback: onTapCallback,
           textController: textController,
+          editableFocusNode: editableFocusNode,
         ),),
       ],),
       decoration: BoxDecoration(
@@ -96,6 +94,7 @@ class SearchText extends StatelessWidget {
   final Function onTapCallback;
   final TextEditingController textController;
   final Function onInput;
+  final FocusNode editableFocusNode;
 
   /// Creates either a [TextField] or a [Text] depending on the [editable] parameter.
   /// [onTapCallback] is only used if not [editable] and is called when the widget is tapped.
@@ -105,6 +104,7 @@ class SearchText extends StatelessWidget {
     this.editable,
     this.onTapCallback, 
     this.textController, 
+    this.editableFocusNode,
     this.onInput,
   });
 
@@ -115,6 +115,7 @@ class SearchText extends StatelessWidget {
         controller: textController,
         key: Keys.searchField,
         autofocus: true,
+        focusNode: editableFocusNode,
         decoration: InputDecoration(
           hintText: Strings.search,
           border: InputBorder.none,
