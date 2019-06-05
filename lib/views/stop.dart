@@ -76,7 +76,7 @@ class StopViewState extends State<StopView> {
               left: 0.0,
               right: 0.0,
               child: SearchAppBar(
-                scaffoldKey: Keys.scaffoldKey,
+                scaffoldKey: Keys.viewStopScaffoldKey,
                 onTapCallback: () => startSearching(context),
                 searching: false,
                 viewingStop: true,

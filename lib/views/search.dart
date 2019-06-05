@@ -22,21 +22,21 @@ class SearchViewState extends State<SearchView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-//        key: Keys.scaffoldKey,
-    appBar: AppBar(
-      automaticallyImplyLeading: false,
-      title: SearchAppBar.buildSearchAppBarTitle(
-          context,
-          textController,
-          true,
-          false,
-          () => Navigator.pop(context),
-          widget.stopSelectCallback,
-          searchForStopMatching,
-          Keys.scaffoldKey),
-      backgroundColor: Colors.transparent, //No more green
-      elevation: 0.0, //Shadow gone
-    ),
+        key: Keys.searchScaffoldKey,
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          title: SearchAppBar.buildSearchAppBarTitle(
+              context,
+              textController,
+              true,
+              false,
+              () => Navigator.pop(context),
+              null,
+              searchForStopMatching,
+              Keys.searchScaffoldKey),
+          backgroundColor: Colors.transparent, //No more green
+          elevation: 0.0, //Shadow gone
+        ),
         body: Stack(children: <Widget>[
           Container(
               child: SearchStops(stops: searchedStops, stopTapCallback: (stop){

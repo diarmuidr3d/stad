@@ -54,7 +54,7 @@ class HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: Keys.scaffoldKey,
+      key: Keys.homeScaffoldKey,
       drawer: FavDrawer(onStopTap: closeFavsOnSelect,),
       body: Stack(children: <Widget>[
         Container(
@@ -88,7 +88,7 @@ class HomeState extends State<Home> {
             left: 0.0,
             right: 0.0,
             child: SearchAppBar(
-              scaffoldKey: Keys.scaffoldKey,
+              scaffoldKey: Keys.homeScaffoldKey,
               onTapCallback: () => startSearching(context),
               searching: false,
               viewingStop: false,

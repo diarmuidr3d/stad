@@ -3,7 +3,6 @@ import 'package:flutter/widgets.dart';
 
 class Keys {
   // WIDGETS
-  static final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
   static final map = const Key('__gmap__');
 
   static final realTimeList = const Key('__realTimeList__');
@@ -20,4 +19,9 @@ class Keys {
   // Preference Keys
   static final dbCopied = '__databaseCopied__';
   static final favouriteStations = '__favouriteStations__';
+
+  // Scaffold Keys
+  static final GlobalKey<ScaffoldState> homeScaffoldKey = new GlobalKey<ScaffoldState>();
+  static final GlobalKey<ScaffoldState> searchScaffoldKey = new GlobalKey<ScaffoldState>();
+  static final GlobalKey<ScaffoldState> viewStopScaffoldKey = new GlobalKey<ScaffoldState>();
 }
