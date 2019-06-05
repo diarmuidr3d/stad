@@ -15,10 +15,11 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Home(),
-      theme: new ThemeData(
-        primaryColor: Styles.appPurple,
-        textTheme: TextTheme().apply(bodyColor: Colors.green, displayColor: Colors.orange)
-      )
+      theme: ThemeData(
+        primarySwatch: Styles.appPurple,
+        brightness: Brightness.light,
+        iconTheme: IconThemeData(color: Styles.iconColour)
+      ),
     );
   }
 }

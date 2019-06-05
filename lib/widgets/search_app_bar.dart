@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:stad/keys.dart';
 import 'package:stad/resources/strings.dart';
 
+import '../styles.dart';
+
 
 
 class SearchAppBar extends StatelessWidget {
@@ -30,7 +32,8 @@ class SearchAppBar extends StatelessWidget {
       automaticallyImplyLeading: false,
       title: buildSearchAppBarTitle(context, textFieldController, searching, viewingStop, backCallback, onTapCallback, handleInputCallback, scaffoldKey),
       backgroundColor: Colors.transparent, //No more green
-      elevation: 0.0, //Shadow gone
+      elevation: 0.0, // means no shadow
+      brightness: Brightness.light
     );
   }
   
@@ -44,6 +47,7 @@ class SearchAppBar extends StatelessWidget {
       Function handleInputCallback,
       scaffoldKey)
   {
+    print("searching $searching");
     return Container(
       child: Row(children: <Widget>[
         _getIcon(context, searching, viewingStop, backCallback, scaffoldKey),
@@ -51,12 +55,12 @@ class SearchAppBar extends StatelessWidget {
           controller: textController,
           key: Keys.searchField,
           autofocus: searching,
-          enabled: !searching,
+          enableInteractiveSelection: searching,
           decoration: InputDecoration(
             hintText: Strings.search,
             border: InputBorder.none,
           ),
-          onTap: () => onTapCallback(),
+          onTap: onTapCallback,
           onChanged: (string) => handleInputCallback(string),
         )),
       ],),
@@ -68,17 +72,18 @@ class SearchAppBar extends StatelessWidget {
     );
   }
 
-  static IconButton _getIcon(BuildContext context, bool searching, bool viewingStop, Function backCallback, scaffoldKey) {
-    if (searching || viewingStop) {
-      return IconButton(icon: Icon(Icons.arrow_back),
-        onPressed: () {
-          backCallback();
-        },
-        color: Colors.black,);
+  static Widget _getIcon(BuildContext context, bool searching, bool viewingStop, Function backCallback, scaffoldKey) {
+    final ModalRoute<dynamic> parentRoute = ModalRoute.of(context);
+    final bool canPop = parentRoute?.canPop ?? false;
+    if (canPop) {
+      return BackButton(color: Styles.iconColour,);
     } else {
-      return IconButton(icon: Icon(Icons.dehaze),
-        onPressed: () => scaffoldKey.currentState.openDrawer(),
-        color: Colors.black,);
+      return IconButton(
+        icon: const Icon(Icons.menu),
+        color: Styles.iconColour,
+        onPressed: () => Scaffold.of(context).openDrawer(),
+        tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
+      );
     }
   }
 
