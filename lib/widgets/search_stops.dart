@@ -65,7 +65,7 @@ class StopResultState extends State<StopResult> {
     return IconButton(
         icon: isFavourite != null && isFavourite ? Icon(Icons.favorite, color: Colors.red,) : Icon(Icons.favorite_border,),
         onPressed: () {
-          String stopCode = widget.stop is Map ? widget.stop["stop_code"] : widget.stop;
+          String stopCode = widget.stop is Map ? widget.stop["stop_code"] : widget.stop.stopCode;
           if (isFavourite == null || !isFavourite) {
             Favourites().addFavourite(stopCode);
             setState(() => isFavourite = true);
