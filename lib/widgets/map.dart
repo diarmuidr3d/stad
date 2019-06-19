@@ -61,21 +61,26 @@ class TransitMapState extends State<TransitMap> {
     super.initState();
     /// If we're just showing the stop, we just want a static view, so don't care for user's location
     if(widget.stopToShow == null) {
-      LocationManager().getLocationListener().then((locationListener){
-        locationListener.first.then((loc) {
-          userPosition = loc;
-          currentPosition = CameraPosition(
-            target: userPosition,
-            zoom: 17,
-          );
-          moveCameraTo(userPosition);
-        });
-        locationListener.listen((loc) => userPosition = loc);
-      });
+      setupLocation();
     } else {
       currentPosition = CameraPosition(target: widget.stopToShow.latLng, zoom: 17,);
     }
-    }
+  }
+
+  setupLocation() async {
+    final locationManager = LocationManager();
+    print("started");
+    userPosition = await locationManager.getLocation();
+    print("userPosition: $userPosition");
+    currentPosition = CameraPosition(
+      target: userPosition,
+      zoom: 17,
+    );
+    moveCameraTo(userPosition);
+    final listener = await locationManager.getLocationListener();
+    print("lidtener: $listener");
+    listener.listen((loc) => userPosition = loc);
+  }
 
   @override
   Widget build(BuildContext context) {
