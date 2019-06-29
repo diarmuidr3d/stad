@@ -206,20 +206,23 @@ class RealTimeUtilities {
   static Future<RealTimeStopData> getStopTimings(Stop stop) async {
     final stopData = RealTimeStopData(stop: stop);
     if (stop.operator == null) throw Exception("No operator for stop ${stop.stopCode}");
-    switch (stop.operator) {
-      case Operator.BusEireann:
-        stopData.timings = await BusEireannAPI().getTimings(stop.apiStopCode);
-        break;
-      case Operator.DublinBus:
-        stopData.timings = await DublinBusAPI().getTimings(stop.stopCode);
-        break;
-      case Operator.IarnrodEireann:
-        stopData.timings = await IarnrodEireannAPI().getTimings(stop.stopCode);
-        break;
-      case Operator.Luas:
-        stopData.timings = await LuasAPI().getTimings(stop.stopCode);
-        break;
-    }
+    try {
+      switch (stop.operator) {
+        case Operator.BusEireann:
+          stopData.timings = await BusEireannAPI().getTimings(stop.apiStopCode);
+          break;
+        case Operator.DublinBus:
+          stopData.timings = await DublinBusAPI().getTimings(stop.stopCode);
+          break;
+        case Operator.IarnrodEireann:
+          stopData.timings =
+          await IarnrodEireannAPI().getTimings(stop.stopCode);
+          break;
+        case Operator.Luas:
+          stopData.timings = await LuasAPI().getTimings(stop.stopCode);
+          break;
+      }
+    } catch (SocketException) {}
     if (stopData.timings != null) stopData.timings.sort((a, b) => a.dueMins.compareTo(b.dueMins));
     return stopData;
   }
