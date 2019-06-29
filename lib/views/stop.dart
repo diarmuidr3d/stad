@@ -59,7 +59,8 @@ class StopViewState extends State<StopView> {
               Expanded(child:
                 Text(" - ${widget.stop.address}", style: Styles.biggerFont, overflow: TextOverflow.ellipsis, maxLines: 1,),
               ),
-              IconButton(icon: Icon(Icons.refresh), onPressed: () => getTimings(widget.stop),),
+              if(loading) CircularProgressIndicator()
+              else IconButton(icon: Icon(Icons.refresh), onPressed: () => getTimings(widget.stop),),
               getFavIcon(),
             ]),
             Divider(),
@@ -91,6 +92,7 @@ class StopViewState extends State<StopView> {
   }
 
   void getTimings(Stop stop) async {
+    setState(() => loading = true);
     RealTimeUtilities.getStopTimings(stop).then((stopData) {
       setState(() {
         print(stopData);
