@@ -18,8 +18,6 @@ class LocationManager {
 
   /// Checks if the user has granted location access, requests it if not
   Future<bool> checkForPermission() async {
-//    if (await _location.hasPermission()) return true;
-//    else return await _location.requestPermission();
     if(!checkingForPermission) {
       checkingForPermission = true;
       _permission = requestPermission();

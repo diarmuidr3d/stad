@@ -82,7 +82,10 @@ class TransitMapState extends State<TransitMap> {
     }
     moveCameraToPosition(currentPosition);
     final listener = await locationManager.getLocationListener();
-    listener.listen((loc) => userPosition = loc);
+    listener.listen((loc) {
+      userPosition = loc;
+      print("userpos: $userPosition");
+    });
   }
 
   @override
@@ -98,7 +101,7 @@ class TransitMapState extends State<TransitMap> {
         scrollGesturesEnabled: widget.interactionEnabled,
         tiltGesturesEnabled: widget.interactionEnabled,
         zoomGesturesEnabled: widget.interactionEnabled,
-        myLocationButtonEnabled: false,
+        myLocationButtonEnabled: widget.stopToShow != null && widget.interactionEnabled,
         myLocationEnabled: true,
         compassEnabled: false,
         markers: markers,
@@ -108,7 +111,7 @@ class TransitMapState extends State<TransitMap> {
         gestureRecognizers: widget.gestureRecognizers,
         onTap: widget.interactionEnabled ? (latLng) {} : widget.onMapTapped,
       ),
-      if (widget.interactionEnabled) Positioned(
+      if (widget.interactionEnabled && widget.stopToShow == null) Positioned(
         right: 10,
         bottom: 10,
         child: Container(
