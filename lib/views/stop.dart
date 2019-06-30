@@ -29,6 +29,7 @@ class StopViewState extends State<StopView> {
   var stopData = RealTimeStopData();
   final textController = TextEditingController();
   bool isFavourite;
+  bool getTimingsScheduled;
 
 
   @override
@@ -99,7 +100,16 @@ class StopViewState extends State<StopView> {
         this.stopData = stopData;
         loading = false;
       });
+      getTimingsScheduled = false;
+      autoRefresh(stop);
     });
+  }
+
+  void autoRefresh(Stop stop) async {
+    if (!getTimingsScheduled) {
+      getTimingsScheduled = true;
+      Future.delayed(Duration(seconds: 30), () => getTimings(stop));
+    }
   }
 
   IconButton getFavIcon() {
