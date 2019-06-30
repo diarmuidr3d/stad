@@ -1,11 +1,13 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stad/keys.dart';
 import 'package:stad/models.dart';
 import 'package:stad/styles.dart';
 import 'package:stad/utilities/real_time_apis.dart';
 import 'package:stad/utilities/favourites.dart';
+import 'package:stad/views/home.dart';
 import 'package:stad/widgets/map.dart';
 import 'package:stad/widgets/real_time_list.dart';
 import 'package:stad/widgets/search_app_bar.dart';
@@ -45,15 +47,16 @@ class StopViewState extends State<StopView> {
     return Scaffold(
         body: Stack(children: <Widget>[
           Column(children: <Widget>[
-            Container(
-              height: MediaQuery.of(context).size.height * 0.35,
-              child: TransitMap(
-                controller: Completer(),
-                onStopTapped: () {},
-                interactionEnabled: false,
-                stopToShow: widget.stop,
-              )
-            ),
+              Container(
+                height: MediaQuery.of(context).size.height * 0.35,
+                child: TransitMap(
+                  controller: Completer(),
+                  onStopTapped: onTapMap,
+                  onMapTapped: onTapMap,
+                  interactionEnabled: false,
+                  stopToShow: widget.stop,
+                ),
+              ),
             Row(children: <Widget>[
               SizedBox(width: 10.0,),
               Text(widget.stop.stopCode, style: Styles.routeNumberStyle,),
@@ -86,6 +89,10 @@ class StopViewState extends State<StopView> {
           )
         ],)
     );
+  }
+
+  void onTapMap (latLng) {
+    Navigator.push(context, MaterialPageRoute(builder: (context) => HomeView(stopToShow: widget.stop,)));
   }
 
   void startSearching(BuildContext context) {
@@ -126,5 +133,4 @@ class StopViewState extends State<StopView> {
         }
     );
   }
-
 }

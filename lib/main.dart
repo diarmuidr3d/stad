@@ -14,7 +14,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Home(),
+      home: HomeView(),
       theme: ThemeData(
         primarySwatch: Styles.appPurple,
         brightness: Brightness.light,

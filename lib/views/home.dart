@@ -5,7 +5,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-import 'package:stad/keys.dart';
 import 'package:stad/models.dart';
 import 'package:stad/resources/strings.dart';
 import 'package:stad/utilities/favourites.dart';
@@ -19,15 +18,20 @@ import 'package:stad/widgets/map.dart';
 
 import '../styles.dart';
 
-class Home extends StatefulWidget {
+class HomeView extends StatefulWidget {
+  final Stop stopToShow;
+
+  const HomeView({this.stopToShow});
+
   @override
-  State<StatefulWidget> createState() => HomeState();
+  State<StatefulWidget> createState() => HomeViewState();
 }
 
-class HomeState extends State<Home> {
+class HomeViewState extends State<HomeView> {
   List<String> currentFavourites;
   List searchedStops;
   Stop selectedStop;
+  GlobalKey<ScaffoldState> key = GlobalKey<ScaffoldState>();
   final TextEditingController searchFieldController = TextEditingController();
   var mapCompleter = Completer<GoogleMapController>();
   final Set<Factory<OneSequenceGestureRecognizer>> mapGestureRecognizers = Set.from([
@@ -47,7 +51,7 @@ class HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: Keys.homeScaffoldKey,
+      key: key,
       drawer: FavDrawer(onStopTap: closeFavsOnSelect,),
       body: Stack(children: <Widget>[
         Container(
@@ -56,17 +60,18 @@ class HomeState extends State<Home> {
             padding: EdgeInsets.all(0),
             children: <Widget>[
               SizedBox(
-                height: MediaQuery.of(context).size.height * 0.75,
+                height: MediaQuery.of(context).size.height * (widget.stopToShow == null ? 0.75 : 1.0 ),
                 child: TransitMap(
                   controller: mapCompleter,
                   onStopTapped: viewStop,
                   interactionEnabled: true,
                   gestureRecognizers: mapGestureRecognizers,
+                  stopToShow: widget.stopToShow,
                 ),
               ),
-              DragBar(),
-              Row(children: <Widget>[Spacer(), Text(Strings.nearbyStops, style: Styles.biggerFont,), Spacer(),]),
-              NearbyStops(),
+              if(widget.stopToShow == null) DragBar(),
+              if(widget.stopToShow == null) Row(children: <Widget>[Spacer(), Text(Strings.nearbyStops, style: Styles.biggerFont,), Spacer(),]),
+              if(widget.stopToShow == null) NearbyStops(),
             ],
           ),
         ),
@@ -75,7 +80,7 @@ class HomeState extends State<Home> {
             left: 0.0,
             right: 0.0,
             child: SearchAppBar(
-              scaffoldKey: Keys.homeScaffoldKey,
+              scaffoldKey: key,
               onTapCallback: () => startSearching(context),
               searching: false,
               handleInputCallback: () {},

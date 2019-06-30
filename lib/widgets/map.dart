@@ -18,6 +18,7 @@ class TransitMap extends StatefulWidget {
 
   final Completer<GoogleMapController> controller;
   final Function onStopTapped;
+  final ArgumentCallback<LatLng> onMapTapped;
   final bool interactionEnabled;
   final Stop stopToShow;
 
@@ -25,16 +26,19 @@ class TransitMap extends StatefulWidget {
 
   final Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers;
 
+  /// Builds a Google Map
+  /// [onMapTapped] is only used if [interactionEnabled] is set to false.
   TransitMap({
     @required this.controller,
     @required this.onStopTapped,
     @required this.interactionEnabled,
+    this.onMapTapped,
     this.stopToShow,
     this.initialPosition = const CameraPosition(
       target: LatLng(53.3834, -8.2177501),
       zoom: 7,
     ),
-    this.gestureRecognizers,
+    this.gestureRecognizers
   }) : super(key: Keys.map);
 
 
@@ -60,25 +64,24 @@ class TransitMapState extends State<TransitMap> {
   void initState() {
     super.initState();
     /// If we're just showing the stop, we just want a static view, so don't care for user's location
+    if(widget.stopToShow != null) currentPosition = CameraPosition(target: widget.stopToShow.latLng, zoom: 17,);
+    if(widget.interactionEnabled) setupLocation();
+  }
+
+  /// Gets the user's location and moves the camera to that position.
+  /// If there's a value in [widget.stopToShow], it moves the camera to that position instead.
+  setupLocation() async {
+    print("setting up location");
+    final locationManager = LocationManager();
+    userPosition = await locationManager.getLocation();
+    print("user is at $userPosition");
     if(widget.stopToShow == null) {
-      setupLocation();
+      currentPosition = CameraPosition(target: userPosition, zoom: 17,);
     } else {
       currentPosition = CameraPosition(target: widget.stopToShow.latLng, zoom: 17,);
     }
-  }
-
-  setupLocation() async {
-    final locationManager = LocationManager();
-    print("started");
-    userPosition = await locationManager.getLocation();
-    print("userPosition: $userPosition");
-    currentPosition = CameraPosition(
-      target: userPosition,
-      zoom: 17,
-    );
-    moveCameraTo(userPosition);
+    moveCameraToPosition(currentPosition);
     final listener = await locationManager.getLocationListener();
-    print("lidtener: $listener");
     listener.listen((loc) => userPosition = loc);
   }
 
@@ -103,6 +106,7 @@ class TransitMapState extends State<TransitMap> {
         onCameraIdle: () => _updateMarkers(currentPosition, context),
         cameraTargetBounds: CameraTargetBounds(LatLngBounds(southwest: TransitMap.SOUTHWEST_BOUND, northeast: TransitMap.NORTHEAST_BOUND)),
         gestureRecognizers: widget.gestureRecognizers,
+        onTap: widget.interactionEnabled ? (latLng) {} : widget.onMapTapped,
       ),
       if (widget.interactionEnabled) Positioned(
         right: 10,
@@ -119,7 +123,7 @@ class TransitMapState extends State<TransitMap> {
               icon: Icon(Icons.my_location),
               onPressed: () {
                 print(userPosition);
-                moveCameraTo(userPosition);
+                moveCameraToLatLng(userPosition);
               }
           ),
         ),
@@ -139,11 +143,7 @@ class TransitMapState extends State<TransitMap> {
             infoWindow: InfoWindow(title: stop.stopCode,
                 snippet: stop.address,
             ),
-            onTap: widget.interactionEnabled ?
-                () => _tapMarker(stop)
-                :
-                null
-            ,
+            onTap: () => _tapMarker(stop),
             consumeTapEvents: !widget.interactionEnabled,
           );
         });
@@ -160,10 +160,13 @@ class TransitMapState extends State<TransitMap> {
     widget.onStopTapped(stop);
   }
 
-  void moveCameraTo(LatLng latLng) {
+  void moveCameraToLatLng(LatLng latLng) {
+      moveCameraToPosition(CameraPosition(target: latLng, zoom: currentPosition.zoom));
+  }
+
+  void moveCameraToPosition(CameraPosition position) {
     widget.controller.future.then((controller) {
-      print("animated camera");
-      controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(target: latLng, zoom: currentPosition.zoom)));
+      controller.animateCamera(CameraUpdate.newCameraPosition(position));
     });
   }
 }
