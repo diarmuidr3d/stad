@@ -1,16 +1,3 @@
-# mytransit
+# Stad
 
-An app for getting around.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.io/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.io/docs/cookbook)
-
-For help getting started with Flutter, view our 
-[online documentation](https://flutter.io/docs), which offers tutorials, 
-samples, guidance on mobile development, and a full API reference.
+A basic app for getting around. I used this app to learn various flutter concepts so the code is not great but I use it on a daily basis for public transport times so it's not all that bad.
