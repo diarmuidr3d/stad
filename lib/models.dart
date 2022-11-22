@@ -9,22 +9,16 @@ final allOperators = {
   "Luas": Operator.Luas,
 };
 
-List<Operator> operatorsFromStringList(List operators) {
-  if (operators[0] is Operator) return operators;
-  else if (operators[0] is String) return operators.map((op) => allOperators[op]);
-  else throw Exception("Operator is neither Operator nor String, don't know how to handle!");
-}
-
 class Route {
   String number;
   String towards;
   String from;
   List<RouteDirection> directions;
   Route({
-    this.number,
-    this.towards,
-    this.from,
-    this.directions
+    required this.number,
+    required this.towards,
+    required this.from,
+    required this.directions
   });
 }
 
@@ -34,9 +28,9 @@ class RouteDirection {
   String dirCode;
   List<Stop> stops = [];
   RouteDirection({
-    this.route,
-    this.dirName,
-    this.dirCode,
+    required this.route,
+    required this.dirName,
+    required this.dirCode,
   });
 }
 
@@ -45,13 +39,13 @@ class Stop {
   String address;
   LatLng latLng;
   String apiStopCode;
-  Operator operator;
+  Operator? operator;
   List<RouteDirection> servedBy = [];
   Stop({
-    this.stopCode,
-    this.apiStopCode,
-    this.address,
-    this.latLng,
+    required this.stopCode,
+    required this.apiStopCode,
+    required this.address,
+    required this.latLng,
     this.operator
   });
 
@@ -72,14 +66,18 @@ enum StopState {UNKNOWN, UNVISITED, VISITING, VISITED, LOADING}
 
 class StopVisited extends Stop {
   StopState state = StopState.LOADING;
-  StopVisited(String stopCode, String address, LatLng latLng)
-      : super(stopCode: stopCode, address: address, latLng: latLng);
+  StopVisited({
+    required String stopCode,
+    required String address,
+    required LatLng latLng,
+    required String apiStopCode
+  }) : super(stopCode: stopCode, address: address, latLng: latLng, apiStopCode: apiStopCode);
 }
 
 class RealTimeStopData {
   Stop stop;
   List<Timing> timings = [];
-  RealTimeStopData({this.stop});
+  RealTimeStopData({required this.stop});
 }
 
 class Timing {
@@ -89,14 +87,16 @@ class Timing {
   String journeyReference;
   int inbound;
   bool realTime;
+  LatLng? vehicleLocation;
 
   Timing({
-    this.route,
-    this.heading,
-    this.dueMins,
-    this.journeyReference,
-    this.inbound,
+    required this.route,
+    required this.heading,
+    required this.dueMins,
+    required this.journeyReference,
+    required this.inbound,
     this.realTime = true,
+    this.vehicleLocation,
   });
 
   String toString() => "$route - $heading: $dueMins mins";

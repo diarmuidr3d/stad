@@ -8,18 +8,18 @@ import '../styles.dart';
 
 class SearchAppBar extends StatelessWidget {
   final scaffoldKey;
-  final Function onTapCallback;
+  final void Function()? onTapCallback;
   final bool searching;
-  final Function handleInputCallback;
+  final void Function(String)? handleInputCallback;
   final TextEditingController textFieldController;
 
   const SearchAppBar({
-    Key key,
-    @required this.scaffoldKey,
-    @required this.onTapCallback,
-    @required this.searching,
-    @required this.handleInputCallback,
-    @required this.textFieldController,
+    Key? key,
+    required this.scaffoldKey,
+    this.onTapCallback,
+    required this.searching,
+    this.handleInputCallback,
+    required this.textFieldController,
   }) : super(key: key);
 
   @override
@@ -40,11 +40,11 @@ class SearchAppBar extends StatelessWidget {
 }
 
 class SearchWidget extends StatelessWidget {
-  final TextEditingController textController;
-  final bool searching;
-  final Function onTapCallback;
-  final Function handleInputCallback;
-  final FocusNode editableFocusNode;
+  final TextEditingController? textController;
+  final bool? searching;
+  final void Function()? onTapCallback;
+  final void Function(String)? handleInputCallback;
+  final FocusNode? editableFocusNode;
 
   /// Builds a box with rounded edges containing an Icon button on the left and a [SearchText] on the right.
   /// The button is either a menu icon to open the drawer or a back button.
@@ -73,7 +73,7 @@ class SearchWidget extends StatelessWidget {
   }
 
   Widget _getIcon(BuildContext context) {
-    final ModalRoute<dynamic> parentRoute = ModalRoute.of(context);
+    final ModalRoute<dynamic>? parentRoute = ModalRoute.of(context);
     final bool canPop = parentRoute?.canPop ?? false;
     if (canPop) {
       return BackButton(color: Styles.iconColour,);
@@ -90,11 +90,11 @@ class SearchWidget extends StatelessWidget {
 }
 
 class SearchText extends StatelessWidget {
-  final bool editable;
-  final Function onTapCallback;
-  final TextEditingController textController;
-  final Function onInput;
-  final FocusNode editableFocusNode;
+  final bool? editable;
+  final void Function()? onTapCallback;
+  final TextEditingController? textController;
+  final void Function(String)? onInput;
+  final FocusNode? editableFocusNode;
 
   /// Creates either a [TextField] or a [Text] depending on the [editable] parameter.
   /// [onTapCallback] is only used if not [editable] and is called when the widget is tapped.
@@ -110,7 +110,7 @@ class SearchText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if(editable) {
+    if(editable != null && editable!) {
       return TextField(
         controller: textController,
         key: Keys.searchField,
@@ -130,7 +130,7 @@ class SearchText extends StatelessWidget {
     }
   }
 
-  TextStyle _getInlineStyle(ThemeData themeData) {
-    return themeData.textTheme.subtitle1.copyWith(color: themeData.hintColor);
+  TextStyle? _getInlineStyle(ThemeData themeData) {
+    return themeData.textTheme.subtitle1?.copyWith(color: themeData.hintColor);
   }
 }

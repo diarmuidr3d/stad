@@ -24,12 +24,12 @@ class SlidingUpPanel extends StatefulWidget {
 
   /// The Widget displayed overtop the [panel] when collapsed.
   /// This fades out as the panel is opened.
-  final Widget collapsed;
+  final Widget? collapsed;
 
   /// The Widget that lies underneath the sliding panel.
   /// This Widget automatically sizes itself
   /// to fill the screen.
-  final Widget body;
+  final Widget? body;
 
   /// The height of the sliding panel when fully collapsed.
   final double minHeight;
@@ -50,10 +50,10 @@ class SlidingUpPanel extends StatefulWidget {
   final Color color;
 
   /// The amount to inset the children of the sliding panel sheet.
-  final EdgeInsetsGeometry padding;
+  final EdgeInsetsGeometry? padding;
 
   /// Empty space surrounding the sliding panel sheet.
-  final EdgeInsetsGeometry margin;
+  final EdgeInsetsGeometry? margin;
 
   /// Set to false to not to render the sheet the [panel] sits upon.
   /// This means that only the [body], [collapsed], and the [panel]
@@ -67,10 +67,10 @@ class SlidingUpPanel extends StatefulWidget {
   final bool panelSnapping;
 
   /// If non-null, this can be used to control the state of the panel.
-  final PanelController controller;
+  final PanelController? controller;
 
   /// If non-null, shows a darkening shadow over the [body] as the panel slides open.
-  final bool backdropEnabled;
+  final bool? backdropEnabled;
 
   /// Shows a darkening shadow of this [Color] over the [body] as the panel slides open.
   final Color backdropColor;
@@ -88,20 +88,20 @@ class SlidingUpPanel extends StatefulWidget {
   /// is called as the panel slides around with the
   /// current position of the panel. The position is a double
   /// between 0.0 and 1.0 where 0.0 is fully collapsed and 1.0 is fully open.
-  final void Function(double position) onPanelSlide;
+  final void Function(double position)? onPanelSlide;
 
   /// If non-null, this callback is called when the
   /// panel is fully opened
-  final VoidCallback onPanelOpened;
+  final VoidCallback? onPanelOpened;
 
   /// If non-null, this callback is called when the panel
   /// is fully collapsed.
-  final VoidCallback onPanelClosed;
+  final VoidCallback? onPanelClosed;
 
   /// If non-null and true, the SlidingUpPanel exhibits a
   /// parallax effect as the panel slides up. Essentially,
   /// the body slides up as the panel slides up.
-  final bool parallaxEnabled;
+  final bool? parallaxEnabled;
 
   /// Allows for specifying the extent of the parallax effect in terms
   /// of the percentage the panel has slid up/down. Recommended values are
@@ -123,14 +123,14 @@ class SlidingUpPanel extends StatefulWidget {
   final double initialHeight;
 
   SlidingUpPanel({
-    Key key,
-    @required this.panel,
+    required Key key,
+    required this.panel,
     this.body,
-    this.collapsed,
+    required this.collapsed,
     this.minHeight = 100.0,
     this.maxHeight = 500.0,
-    this.border,
-    this.borderRadius,
+    required this.border,
+    required this.borderRadius,
     this.boxShadow = const <BoxShadow>[
       BoxShadow(
         blurRadius: 8.0,
@@ -164,7 +164,7 @@ class SlidingUpPanel extends StatefulWidget {
 
 class _SlidingUpPanelState extends State<SlidingUpPanel> with SingleTickerProviderStateMixin{
 
-  AnimationController _ac;
+  late AnimationController _ac;
 
   bool _isPanelVisible = true;
 
@@ -179,11 +179,11 @@ class _SlidingUpPanelState extends State<SlidingUpPanel> with SingleTickerProvid
     )..addListener((){
       setState((){});
 
-      if(widget.onPanelSlide != null) widget.onPanelSlide(_ac.value);
+      if(widget.onPanelSlide != null) widget.onPanelSlide!(_ac.value);
 
-      if(widget.onPanelOpened != null && _ac.value == 1.0) widget.onPanelOpened();
+      if(widget.onPanelOpened != null && _ac.value == 1.0) widget.onPanelOpened!();
 
-      if(widget.onPanelClosed != null && _ac.value == 0.0) widget.onPanelClosed();
+      if(widget.onPanelClosed != null && _ac.value == 0.0) widget.onPanelClosed!();
     });
 
     widget.controller?._addListeners(
@@ -208,7 +208,7 @@ class _SlidingUpPanelState extends State<SlidingUpPanel> with SingleTickerProvid
       children: <Widget>[
         //make the back widget take up the entire back side
         widget.body != null ? Positioned(
-          top: widget.parallaxEnabled ? _getParallax() : 0.0,
+          top: widget.parallaxEnabled != null && widget.parallaxEnabled! ? _getParallax() : 0.0,
           child: Container(
             height: MediaQuery.of(context).size.height,
             width: MediaQuery.of(context).size.width,
@@ -239,8 +239,8 @@ class _SlidingUpPanelState extends State<SlidingUpPanel> with SingleTickerProvid
                     top: widget.slideDirection == SlideDirection.UP ? 0.0 : null,
                     bottom: widget.slideDirection == SlideDirection.DOWN ? 0.0 : null,
                     width:  MediaQuery.of(context).size.width -
-                        (widget.margin != null ? widget.margin.horizontal : 0) -
-                        (widget.padding != null ? widget.padding.horizontal : 0),
+                        (widget.margin != null ? widget.margin!.horizontal : 0) -
+                        (widget.padding != null ? widget.padding!.horizontal : 0),
                     child: Container(
                       height: widget.maxHeight,
                       child: widget.panel,
@@ -252,8 +252,8 @@ class _SlidingUpPanelState extends State<SlidingUpPanel> with SingleTickerProvid
                   top: widget.slideDirection == SlideDirection.UP ? 0.0 : null,
                   bottom: widget.slideDirection == SlideDirection.DOWN ? 0.0 : null,
                   width:  MediaQuery.of(context).size.width -
-                      (widget.margin != null ? widget.margin.horizontal : 0) -
-                      (widget.padding != null ? widget.padding.horizontal : 0),
+                      (widget.margin != null ? widget.margin!.horizontal : 0) -
+                      (widget.padding != null ? widget.padding!.horizontal : 0),
                   child: Container(
                     height: widget.minHeight,
                     child: Opacity(
@@ -293,10 +293,11 @@ class _SlidingUpPanelState extends State<SlidingUpPanel> with SingleTickerProvid
   }
 
   void _onDrag(DragUpdateDetails details){
+    if(details.primaryDelta == null) return;
     if(widget.slideDirection == SlideDirection.UP)
-      _ac.value -= details.primaryDelta / (widget.maxHeight - widget.minHeight);
+      _ac.value -= details.primaryDelta! / (widget.maxHeight - widget.minHeight);
     else
-      _ac.value += details.primaryDelta / (widget.maxHeight - widget.minHeight);
+      _ac.value += details.primaryDelta! / (widget.maxHeight - widget.minHeight);
   }
 
   void _onDragEnd(DragEndDetails details){
@@ -425,17 +426,17 @@ class _SlidingUpPanelState extends State<SlidingUpPanel> with SingleTickerProvid
 
 
 class PanelController{
-  VoidCallback _closeListener;
-  VoidCallback _openListener;
-  VoidCallback _hideListener;
-  VoidCallback _showListener;
-  Function(double value) _setPanelPositionListener;
-  Function(double value) _setAnimatePanelToPositionListener;
-  double Function() _getPanelPositionListener;
-  bool Function() _isPanelAnimatingListener;
-  bool Function() _isPanelOpenListener;
-  bool Function() _isPanelClosedListener;
-  bool Function() _isPanelShownListener;
+  late VoidCallback _closeListener;
+  late VoidCallback _openListener;
+  late VoidCallback _hideListener;
+  late VoidCallback _showListener;
+  late Function(double value) _setPanelPositionListener;
+  late Function(double value) _setAnimatePanelToPositionListener;
+  late double Function() _getPanelPositionListener;
+  late bool Function() _isPanelAnimatingListener;
+  late bool Function() _isPanelOpenListener;
+  late bool Function() _isPanelClosedListener;
+  late bool Function() _isPanelShownListener;
 
   void _addListeners(
       VoidCallback closeListener,
