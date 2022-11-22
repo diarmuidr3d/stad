@@ -36,15 +36,15 @@ class HomeViewState extends State<HomeView> {
   @override
   void initState() {
     super.initState();
-    Favourites().getFavourites().then((favs) =>
-        setState(() => currentFavourites = favs));
+    Favourites().getFavourites().then((favourites) =>
+        setState(() => currentFavourites = favourites));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: key,
-      drawer: FavDrawer(onStopTap: closeFavsOnSelect,),
+      drawer: FavDrawer(onStopTap: closeFavouritesOnSelect,),
       body: Stack(children: <Widget>[
         Container(
           height: MediaQuery.of(context).size.height,
@@ -86,7 +86,7 @@ class HomeViewState extends State<HomeView> {
     Navigator.push(context, MaterialPageRoute(builder: (context) => SearchView()));
   }
 
-  void closeFavsOnSelect(Stop stop) {
+  void closeFavouritesOnSelect(Stop stop) {
     viewStop(stop);
   }
 
