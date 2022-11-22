@@ -76,7 +76,7 @@ class StopVisited extends Stop {
 
 class RealTimeStopData {
   Stop stop;
-  List<Timing> timings = [];
+  List<Timing>? timings = [];
   RealTimeStopData({required this.stop});
 }
 

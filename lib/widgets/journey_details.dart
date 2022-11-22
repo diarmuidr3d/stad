@@ -17,7 +17,7 @@ class JourneyDetails extends StatefulWidget {
 }
 
 class JourneyDetailsState extends State<JourneyDetails> {
-  List<StopVisited> stopsBefore;
+  List<StopVisited> stopsBefore = [];
   bool firstRun = true;
 
   @override

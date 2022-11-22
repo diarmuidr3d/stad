@@ -13,7 +13,7 @@ class NearbyStops extends StatefulWidget {
 
 class NearbyStopsState extends State<NearbyStops> {
 
-  List<Stop> nearbyStops;
+  late List<Stop> nearbyStops;
 
   @override
   void initState() {
@@ -28,7 +28,7 @@ class NearbyStopsState extends State<NearbyStops> {
 
   @override
   Widget build(BuildContext context) {
-    if (nearbyStops != null) return ListView.builder(
+    if (nearbyStops.isNotEmpty) return ListView.builder(
         physics: const NeverScrollableScrollPhysics(),
         shrinkWrap: true,
         padding: EdgeInsets.all(0),

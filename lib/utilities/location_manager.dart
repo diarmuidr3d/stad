@@ -5,9 +5,9 @@ class LocationManager {
 
   static final LocationManager _singleton = new LocationManager._internal();
   final Location _location = Location();
-  Future<bool> _permission;
+  Future<bool> _permission = false as Future<bool>;
   bool checkingForPermission = false;
-  Stream<LatLng> _onChanged;
+  Stream<LatLng?>? _onChanged;
 
 
   factory LocationManager() {
@@ -44,7 +44,7 @@ class LocationManager {
   }
 
   /// Returns the current user location as a [LatLng]
-  Future<LatLng> getLocation() async {
+  Future<LatLng?> getLocation() async {
     print("getLocation get permission");
     final permission = await checkForPermission();
     print("getLocation Permission: $permission");
@@ -52,16 +52,22 @@ class LocationManager {
     print("has permission, get location");
     final locationData = await _location.getLocation();
     print("locationdata: $locationData");
-    return LatLng(locationData.latitude, locationData.longitude);
+    return locationDataToLatLng(locationData);
+  }
+
+  LatLng? locationDataToLatLng(LocationData? locationData) {
+    if(locationData == null) return null;
+    if(locationData.latitude == null || locationData.longitude == null) return null;
+    return LatLng(locationData.latitude!, locationData.longitude!);
   }
 
   /// Returns a stream of [LatLng]s for the current user location
-  Future<Stream<LatLng>> getLocationListener() async {
+  Future<Stream<LatLng?>?> getLocationListener() async {
     print("getListener get permission");
     if (!await checkForPermission()) return null;
     if(_onChanged == null) {
       _onChanged = _location.onLocationChanged.map(
-              (locationData) => LatLng(locationData.latitude, locationData.longitude));
+              (locationData) => locationDataToLatLng(locationData));
     }
     return _onChanged;
   }

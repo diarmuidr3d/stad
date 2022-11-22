@@ -8,7 +8,7 @@ class MapIcons {
 
   BuildContext context;
 
-  MapIcons({@required this.context}) {
+  MapIcons({required this.context}) {
     getMarkerIcons(this.context);
   }
 
@@ -19,7 +19,7 @@ class MapIcons {
     Operator.Luas: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueMagenta),
   };
 
-  var _markerIcons = <Operator, Map<IconType, BitmapDescriptor>>{
+  var _markerIcons = <Operator, Map<IconType, BitmapDescriptor?>>{
     Operator.DublinBus: {IconType.Base: null, IconType.Selected: null},
     Operator.IarnrodEireann: {IconType.Base: null, IconType.Selected: null},
     Operator.BusEireann: {IconType.Base: null, IconType.Selected: null},
@@ -45,33 +45,44 @@ class MapIcons {
     },
   };
 
-  Future<Map<Operator, Map<IconType, BitmapDescriptor>>> getMarkerIcons(BuildContext context) async {
-    await getMarkerIconsForOperator(context, Operator.BusEireann);
-    await getMarkerIconsForOperator(context, Operator.DublinBus);
-    await getMarkerIconsForOperator(context, Operator.Luas);
-    await getMarkerIconsForOperator(context, Operator.IarnrodEireann);
+  Future<Map<Operator, Map<IconType, BitmapDescriptor?>>> getMarkerIcons(BuildContext context) async {
+    await getMarkerIconsForOperator(Operator.BusEireann);
+    await getMarkerIconsForOperator(Operator.DublinBus);
+    await getMarkerIconsForOperator(Operator.Luas);
+    await getMarkerIconsForOperator(Operator.IarnrodEireann);
     return _markerIcons;
   }
 
-  Future<Map<IconType, BitmapDescriptor>> getMarkerIconsForOperator(BuildContext context, Operator operator) async {
-    await getMarkerIconForOperatorAndTypeAsync(context, operator, IconType.Base);
-    await getMarkerIconForOperatorAndTypeAsync(context, operator, IconType.Selected);
+  Future<Map<IconType, BitmapDescriptor?>?> getMarkerIconsForOperator(Operator operator) async {
+    await getMarkerIconForOperatorAndTypeAsync(operator: operator, iconType: IconType.Base);
+    await getMarkerIconForOperatorAndTypeAsync(operator: operator, iconType: IconType.Selected);
     return _markerIcons[operator];
   }
 
-  Future<BitmapDescriptor> getMarkerIconForOperatorAndTypeAsync(BuildContext context, Operator operator, IconType iconType) async {
-    if (_markerIcons[operator][iconType] != null) return _markerIcons[operator][iconType];
+  Future<BitmapDescriptor?> getMarkerIconForOperatorAndTypeAsync({Operator? operator, IconType iconType = IconType.Base}) async {
+    if(operator == null) return null;
+    if (_markerIcons[operator]?[iconType] != null) return _markerIcons[operator]![iconType];
     else {
-      _markerIcons[operator][iconType] = await BitmapDescriptor.fromAssetImage(createLocalImageConfiguration(context), markerFiles[operator][iconType]);
-      return _markerIcons[operator][iconType];
+      if(markerFiles[operator]?[iconType] != null) {
+        _markerIcons[operator]?[iconType] =
+        await BitmapDescriptor.fromAssetImage(
+            createLocalImageConfiguration(context),
+            markerFiles[operator]![iconType]!);
+        return _markerIcons[operator]![iconType];
+      } else {
+        return _markerColours[operator];
+      }
     }
   }
   
-  BitmapDescriptor getMarkerIconForOperatorAndType(Operator operator, IconType iconType, BuildContext context, {Function callback}) {
-    if(_markerIcons[operator][iconType] != null) return _markerIcons[operator][iconType];
+  BitmapDescriptor? getMarkerIconForOperatorAndType({Operator? operator, IconType iconType = IconType.Base, Function(BitmapDescriptor?)? callback}) {
+    if(operator == null) return null;
+    if(_markerIcons[operator]?[iconType] != null) return _markerIcons[operator]![iconType];
     else {
-      if(callback != null) getMarkerIconForOperatorAndTypeAsync(context, operator, iconType).then((icon) => callback(icon));
-      else getMarkerIconForOperatorAndTypeAsync(context, operator, iconType);
+      if(callback != null) {
+        getMarkerIconForOperatorAndTypeAsync(operator: operator, iconType: iconType).then((icon) => callback(icon));
+      }
+      getMarkerIconForOperatorAndTypeAsync(operator: operator, iconType: iconType); // to cache
       return _markerColours[operator];
     }
   }

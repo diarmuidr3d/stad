@@ -13,8 +13,8 @@ class RealTimeList extends StatelessWidget {
   final bool loading;
 
   RealTimeList({
-    @required this.stopData,
-    @required this.loading,
+    required this.stopData,
+    required this.loading,
   }) : super(key: Keys.realTimeList);
 
   @override
@@ -22,15 +22,15 @@ class RealTimeList extends StatelessWidget {
     return Container(
       child: loading
           ? Center(child: CircularProgressIndicator())
-          : stopData.timings == null || stopData.timings.isEmpty
+          : stopData.timings == null || stopData.timings!.isEmpty
             ? Text(Strings.noResults)
             : ListView.builder(
                 padding: const EdgeInsets.all(16.0),
-                itemCount: stopData.timings.length,
+                itemCount: stopData.timings!.length,
                 itemBuilder: (context, i) {
                     return RealTimeItem(
                       context: context,
-                      timing: stopData.timings[i],
+                      timing: stopData.timings![i],
                       stop: stopData.stop,
                     );
                 }
@@ -45,15 +45,19 @@ class RealTimeItem extends StatelessWidget {
   final BuildContext context;
 
   RealTimeItem({
-    Key key,
-    @required this.timing, this.context, this.stop
+    Key? key,
+    required this.timing,
+    required this.stop,
+    required this.context,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    if(stop.operator == Operator.IarnrodEireann || stop.operator == Operator.Luas) return IarnrodItem(timing: timing, context: context, stop: stop);
-//    else if(stop.operators.contains(Operator.DublinBus)) return DublinBusItem(timing: timing, context: context, stop: stop);
-    else return DublinBusItem(timing: timing, context: context, stop: stop);
+    if(stop.operator == Operator.IarnrodEireann || stop.operator == Operator.Luas) {
+      return IarnrodItem(timing: timing, context: context, stop: stop);
+    } else {
+      return DublinBusItem(timing: timing, context: context, stop: stop);
+    }
 //    TODO: Add Bus Eireann / Luas specifics here as necessary
   }
 }
@@ -61,9 +65,11 @@ class RealTimeItem extends StatelessWidget {
 class IarnrodItem extends RealTimeItem {
 
   IarnrodItem({
-    Key key,
-    @required timing, context, stop
-  }) : super(key: key, timing: timing, context: context, stop: stop);
+    super.key,
+    required super.timing,
+    required super.context,
+    required super.stop
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -79,9 +85,11 @@ class IarnrodItem extends RealTimeItem {
 class DublinBusItem extends RealTimeItem {
 
   DublinBusItem({
-    Key key,
-    @required timing, context, stop
-  }) : super(key: key, timing: timing, context: context, stop: stop);
+    super.key,
+    required super.timing,
+    required super.context,
+    required super.stop
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -101,7 +109,7 @@ class DublinBusItem extends RealTimeItem {
 class RealTimeMins extends StatelessWidget {
   final Timing timing;
 
-  const RealTimeMins({this.timing});
+  const RealTimeMins({required this.timing});
 
   @override
   Widget build(BuildContext context) {
@@ -124,7 +132,7 @@ class RealTimeMins extends StatelessWidget {
 class RealTimePage extends StatefulWidget {
   final Stop stop;
 
-  const RealTimePage({this.stop});
+  const RealTimePage({required this.stop});
 
   @override
   State<StatefulWidget> createState() => RealTimePageState();
@@ -133,13 +141,13 @@ class RealTimePage extends StatefulWidget {
 class RealTimePageState extends State<RealTimePage> {
 
   var loading = true;
-  var stopData = RealTimeStopData();
+  late RealTimeStopData stopData;
   var firstRun = true;
   var isFavourite;
 
   @override
   Widget build(BuildContext context) {
-    stopData.stop = widget.stop;
+    stopData = RealTimeStopData(stop: widget.stop);
     if (firstRun) {
       firstRun = false;
       displayStopReal(widget.stop);

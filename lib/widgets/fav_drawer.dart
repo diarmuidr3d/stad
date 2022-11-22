@@ -15,7 +15,7 @@ class FavDrawer extends StatefulWidget {
 }
 
 class FavDrawerState extends State<FavDrawer> {
-  List<String> favourites;
+  List<String> favourites = [];
   var loading = true;
 
   @override
@@ -62,9 +62,12 @@ class FavDrawerState extends State<FavDrawer> {
 class FavListTile extends StatefulWidget {
 
   final String stopCode;
-  final Function onTap;
+  final Function? onTap;
 
-  const FavListTile({@required this.stopCode, this.onTap});
+  const FavListTile({
+    required this.stopCode,
+    this.onTap
+  });
 
   @override
   State<StatefulWidget> createState() => FavListTileState();
@@ -73,14 +76,15 @@ class FavListTile extends StatefulWidget {
 
 class FavListTileState extends State<FavListTile> {
 
-  Future<Stop> stopFuture;
-  Stop stop;
+  Future<Stop>? stopFuture;
+  Stop? stop;
   bool isFavourite = true;
 
   @override
   Widget build(BuildContext context) {
     if (stopFuture == null) {
-      stopFuture = RouteDB().getStopWithStopCode(widget.stopCode).then((stop) {
+      stopFuture = RouteDB().getStopWithStopCode(widget.stopCode);
+      stopFuture!.then((stop) {
         setState(() {
           this.stop = stop;
         });
@@ -89,17 +93,17 @@ class FavListTileState extends State<FavListTile> {
     if(stop == null) {
       return ListTile(
         leading: Text(widget.stopCode, style: Styles.routeNumberStyle,),
-        onTap: () async => stopFuture.then((stop) => widget.onTap(stop)),
+        onTap: widget.onTap != null ? () async => stopFuture?.then((stop) => widget.onTap!(stop)) : null,
         trailing: getFavIcon(),
       );
     } else {
-      final leading = stop.operator == Operator.DublinBus ?
-          Text(stop.stopCode, style: Styles.routeNumberStyle,) : null;
+      final leading = stop!.operator == Operator.DublinBus ?
+          Text(stop!.stopCode, style: Styles.routeNumberStyle,) : null;
       return ListTile(
         leading: leading,
-        title: Text(stop.address),
+        title: Text(stop!.address),
         trailing: getFavIcon(),
-        onTap: () => widget.onTap(stop),
+        onTap: widget.onTap != null ?  () => widget.onTap!(stop) : null,
       );
     }
   }

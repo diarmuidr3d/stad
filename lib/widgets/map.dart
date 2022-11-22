@@ -48,14 +48,16 @@ class TransitMap extends StatefulWidget {
 class TransitMapState extends State<TransitMap> {
   Set<Marker> markers = {};
   final minimumZoom = 14; // The minimum zoom level required to see markers
-  CameraPosition currentPosition;
-  LatLng userPosition;
+  CameraPosition? currentPosition;
+  LatLng? userPosition;
   RouteDB db = RouteDB();
-  MapIcons mapIcons;
+  late MapIcons mapIcons;
 
   TransitMapState({
     this.currentPosition
-  });
+  }) {
+    mapIcons = MapIcons(context: context);
+  }
 
   @override
   void initState() {
@@ -95,7 +97,6 @@ class TransitMapState extends State<TransitMap> {
 
   @override
   Widget build(BuildContext context) {
-    mapIcons = MapIcons(context: context);
     return Stack(children: <Widget>[
       GoogleMap(
         initialCameraPosition: currentPosition,
