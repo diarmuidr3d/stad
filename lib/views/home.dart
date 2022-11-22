@@ -34,12 +34,6 @@ class HomeViewState extends State<HomeView> {
   GlobalKey<ScaffoldState> key = GlobalKey<ScaffoldState>();
   final TextEditingController searchFieldController = TextEditingController();
   var mapCompleter = Completer<GoogleMapController>();
-  final Set<Factory<OneSequenceGestureRecognizer>> mapGestureRecognizers = Set.from([
-    Factory<PanGestureRecognizer>(() => PanGestureRecognizer()),
-    Factory<VerticalDragGestureRecognizer>(() => VerticalDragGestureRecognizer()),
-    Factory<HorizontalDragGestureRecognizer>(() => HorizontalDragGestureRecognizer()),
-    Factory<ScaleGestureRecognizer>(() => ScaleGestureRecognizer())
-  ]);
 
   @override
   void initState() {
@@ -65,7 +59,6 @@ class HomeViewState extends State<HomeView> {
                   controller: mapCompleter,
                   onStopTapped: viewStop,
                   interactionEnabled: true,
-                  gestureRecognizers: mapGestureRecognizers,
                   stopToShow: widget.stopToShow,
                 ),
               ),

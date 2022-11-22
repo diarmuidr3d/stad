@@ -24,8 +24,6 @@ class TransitMap extends StatefulWidget {
 
   final CameraPosition initialPosition;
 
-  final Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers;
-
   /// Builds a Google Map
   /// [onMapTapped] is only used if [interactionEnabled] is set to false.
   TransitMap({
@@ -38,7 +36,6 @@ class TransitMap extends StatefulWidget {
       target: LatLng(53.3834, -8.2177501),
       zoom: 7,
     ),
-    this.gestureRecognizers
   }) : super(key: Keys.map);
 
 
@@ -88,6 +85,14 @@ class TransitMapState extends State<TransitMap> {
     });
   }
 
+  mapGestureRecognizers() {
+    return {
+      Factory<OneSequenceGestureRecognizer>(
+            () => EagerGestureRecognizer(),
+      ),
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     mapIcons = MapIcons(context: context);
@@ -102,13 +107,14 @@ class TransitMapState extends State<TransitMap> {
         tiltGesturesEnabled: widget.interactionEnabled,
         zoomGesturesEnabled: widget.interactionEnabled,
         myLocationButtonEnabled: widget.stopToShow != null && widget.interactionEnabled,
+        zoomControlsEnabled: false,
         myLocationEnabled: true,
         compassEnabled: false,
         markers: markers,
         onCameraMove: (CameraPosition p) => currentPosition = p,
         onCameraIdle: () => _updateMarkers(currentPosition, context),
         cameraTargetBounds: CameraTargetBounds(LatLngBounds(southwest: TransitMap.SOUTHWEST_BOUND, northeast: TransitMap.NORTHEAST_BOUND)),
-        gestureRecognizers: widget.interactionEnabled ? widget.gestureRecognizers : {},
+        gestureRecognizers: widget.interactionEnabled ? mapGestureRecognizers() : {},
         onTap: widget.interactionEnabled ? (latLng) {} : widget.onMapTapped,
       ),
       if (widget.interactionEnabled && widget.stopToShow == null) Positioned(
