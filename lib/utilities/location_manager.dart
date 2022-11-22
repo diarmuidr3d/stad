@@ -4,7 +4,7 @@ import 'package:location/location.dart';
 class LocationManager {
 
   static final LocationManager _singleton = new LocationManager._internal();
-  final _location = new Location();
+  final Location _location = Location();
   Future<bool> _permission;
   bool checkingForPermission = false;
   Stream<LatLng> _onChanged;
@@ -30,7 +30,7 @@ class LocationManager {
     bool serviceStatus = await _location.serviceEnabled();
     print("Service status: $serviceStatus");
     if (serviceStatus) {
-      bool _permission = await _location.requestPermission();
+      bool _permission = (await _location.requestPermission()) == PermissionStatus.granted;
       print("Permission: $_permission");
       return _permission;
     } else {
@@ -60,7 +60,7 @@ class LocationManager {
     print("getListener get permission");
     if (!await checkForPermission()) return null;
     if(_onChanged == null) {
-      _onChanged = _location.onLocationChanged().map(
+      _onChanged = _location.onLocationChanged.map(
               (locationData) => LatLng(locationData.latitude, locationData.longitude));
     }
     return _onChanged;

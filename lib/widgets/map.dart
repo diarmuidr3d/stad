@@ -49,7 +49,7 @@ class TransitMap extends StatefulWidget {
 }
 
 class TransitMapState extends State<TransitMap> {
-  Set<Marker> markers;
+  Set<Marker> markers = {};
   final minimumZoom = 14; // The minimum zoom level required to see markers
   CameraPosition currentPosition;
   LatLng userPosition;
@@ -108,7 +108,7 @@ class TransitMapState extends State<TransitMap> {
         onCameraMove: (CameraPosition p) => currentPosition = p,
         onCameraIdle: () => _updateMarkers(currentPosition, context),
         cameraTargetBounds: CameraTargetBounds(LatLngBounds(southwest: TransitMap.SOUTHWEST_BOUND, northeast: TransitMap.NORTHEAST_BOUND)),
-        gestureRecognizers: widget.gestureRecognizers,
+        gestureRecognizers: widget.interactionEnabled ? widget.gestureRecognizers : {},
         onTap: widget.interactionEnabled ? (latLng) {} : widget.onMapTapped,
       ),
       if (widget.interactionEnabled && widget.stopToShow == null) Positioned(

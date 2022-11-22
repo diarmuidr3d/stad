@@ -25,9 +25,11 @@ class DublinBusAPI implements RealTimeAPI {
     </GetRealTimeStopData>
     </soap:Body>
     </soap:Envelope>''';
+    
+    final dublinBusRTPI = Uri.http('rtpi.dublinbus.ie', '/DublinBusRTPIService.asmx');
 
     http.Response response =
-      await http.post('http://rtpi.dublinbus.ie/DublinBusRTPIService.asmx',
+      await http.post(dublinBusRTPI,
         headers: {
           "Content-Type": "text/xml; charset=utf-8",
           "SOAPAction": "http://dublinbus.ie/GetRealTimeStopData",
@@ -101,7 +103,12 @@ class DublinBusAPI implements RealTimeAPI {
 class IarnrodEireannAPI  implements RealTimeAPI {
   
   Future<ETree> _getRealTimeStopDataTree(String stopCode) async {
-    http.Response response = await http.get('http://api.irishrail.ie/realtime/realtime.asmx/getStationDataByCodeXML?StationCode=$stopCode');
+    final irishRailRTPI = Uri.http(
+        'api.irishrail.ie',
+        '/realtime/realtime.asmx/getStationDataByCodeXML',
+        {'StationCode': stopCode}
+    );
+    http.Response response = await http.get(irishRailRTPI);
     final respBody = response.body.substring(response.body.indexOf('>') + 1); // Removes the xml artifact from the start of the response so it can be parsed
     return ETree.fromString(respBody);
   }
@@ -173,7 +180,16 @@ class BusEireannAPI  implements RealTimeAPI {
 class LuasAPI  implements RealTimeAPI {
 
   Future<ETree> _getRealTimeStopDataTree(String stopCode) async {
-    http.Response response = await http.get('http://luasforecasts.rpa.ie/xml/get.ashx?action=forecast&encrypt=false&stop=$stopCode');
+    final luasRTPI = Uri.http(
+        'luasforecasts.rpa.ie',
+        '/xml/get.ashx',
+        {
+          'action': 'forecast',
+          'encrypt': 'false',
+          'stop': stopCode,
+        }
+    );
+    http.Response response = await http.get(luasRTPI);
     print(response.body);
     return ETree.fromString(response.body);
   }

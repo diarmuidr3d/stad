@@ -131,6 +131,6 @@ class SearchText extends StatelessWidget {
   }
 
   TextStyle _getInlineStyle(ThemeData themeData) {
-    return themeData.textTheme.subhead.copyWith(color: themeData.hintColor);
+    return themeData.textTheme.subtitle1.copyWith(color: themeData.hintColor);
   }
 }
