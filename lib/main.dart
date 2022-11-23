@@ -1,3 +1,6 @@
+// @dart=2.9
+// TODO: remove the above line after replacing the xpath dependency
+
 import 'package:flutter/material.dart';
 
 import 'package:stad/styles.dart';

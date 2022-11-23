@@ -5,7 +5,7 @@ class LocationManager {
 
   static final LocationManager _singleton = new LocationManager._internal();
   final Location _location = Location();
-  Future<bool> _permission = false as Future<bool>;
+  bool _permission = false;
   bool checkingForPermission = false;
   Stream<LatLng?>? _onChanged;
 
@@ -18,12 +18,8 @@ class LocationManager {
 
   /// Checks if the user has granted location access, requests it if not
   Future<bool> checkForPermission() async {
-    if(!checkingForPermission) {
-      checkingForPermission = true;
-      _permission = requestPermission();
-    }
-    bool permission = await _permission;
-    return permission;
+    _permission = await requestPermission();
+    return _permission;
   }
 
   Future<bool> requestPermission() async {

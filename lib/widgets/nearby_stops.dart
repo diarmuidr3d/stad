@@ -13,7 +13,7 @@ class NearbyStops extends StatefulWidget {
 
 class NearbyStopsState extends State<NearbyStops> {
 
-  late List<Stop> nearbyStops;
+  List<Stop> nearbyStops = [];
 
   @override
   void initState() {
@@ -37,7 +37,7 @@ class NearbyStopsState extends State<NearbyStops> {
         itemCount: nearbyStops.length < 10 ? nearbyStops.length : 10,
         itemBuilder: (context, index) => StopResult(stop: nearbyStops[index], stopTapCallback: viewStop,)
     );
-    else return Text("No nearby stops found or we do not have access to your location");
+    else return Text("No nearby stops found or we are waiting for your location");
   }
 
   void viewStop(Stop stop) {

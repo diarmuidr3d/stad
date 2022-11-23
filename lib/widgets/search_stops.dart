@@ -41,7 +41,7 @@ class StopResult extends StatefulWidget {
 }
 
 class StopResultState extends State<StopResult> {
-  late bool isFavourite;
+  bool isFavourite = false;
 
   @override
   Widget build(BuildContext context) {

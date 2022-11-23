@@ -57,7 +57,7 @@ class TransitMapState extends State<TransitMap> {
   TransitMapState({
     required this.currentPosition
   }) {
-    mapIcons = MapIcons(context: context);
+    mapIcons = MapIcons();
   }
 
   @override
@@ -150,12 +150,12 @@ class TransitMapState extends State<TransitMap> {
     ],);
   }
 
-  void _updateMarkers(CameraPosition p, BuildContext context) {
-    db.getNearbyStopsIteratingRange(p.target).then((stops) {
-        Iterable<Marker> markerMapList = stops.map((stop) {
+  void _updateMarkers(CameraPosition p, BuildContext context) async {
+    db.getNearbyStopsIteratingRange(p.target).then((stops) async {
+        Iterable<Future<Marker>> markerMapList = stops.map((stop) async {
           var iconType = IconType.Base;
           if (widget.stopToShow != null && stop.stopCode == widget.stopToShow!.stopCode) iconType = IconType.Selected;
-          var icon = mapIcons.getMarkerIconForOperatorAndType(operator: stop.operator, iconType: iconType);
+          var icon = await mapIcons.getMarkerIconForOperatorAndTypeAsync(operator: stop.operator, iconType: iconType, context: context);
           if(icon != null) {
             return Marker(
               icon: icon,
@@ -179,9 +179,10 @@ class TransitMapState extends State<TransitMap> {
             );
           }
         });
+        final iterableMarkers = await Future.wait(markerMapList);
         setState(() {
           print("setting markers");
-          markers = markerMapList.toSet();
+          markers = iterableMarkers.toSet();
           currentPosition = p;
         });
       }

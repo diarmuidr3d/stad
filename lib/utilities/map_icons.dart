@@ -6,12 +6,6 @@ enum IconType {Base, Selected}
 
 class MapIcons {
 
-  BuildContext context;
-
-  MapIcons({required this.context}) {
-    getMarkerIcons(this.context);
-  }
-
   final _markerColours = <Operator, BitmapDescriptor>{
     Operator.DublinBus: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow),
     Operator.IarnrodEireann: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
@@ -45,21 +39,21 @@ class MapIcons {
     },
   };
 
-  Future<Map<Operator, Map<IconType, BitmapDescriptor?>>> getMarkerIcons(BuildContext context) async {
-    await getMarkerIconsForOperator(Operator.BusEireann);
-    await getMarkerIconsForOperator(Operator.DublinBus);
-    await getMarkerIconsForOperator(Operator.Luas);
-    await getMarkerIconsForOperator(Operator.IarnrodEireann);
-    return _markerIcons;
-  }
+  // Future<Map<Operator, Map<IconType, BitmapDescriptor?>>> getMarkerIcons() async {
+  //   await getMarkerIconsForOperator(Operator.BusEireann);
+  //   await getMarkerIconsForOperator(Operator.DublinBus);
+  //   await getMarkerIconsForOperator(Operator.Luas);
+  //   await getMarkerIconsForOperator(Operator.IarnrodEireann);
+  //   return _markerIcons;
+  // }
 
-  Future<Map<IconType, BitmapDescriptor?>?> getMarkerIconsForOperator(Operator operator) async {
-    await getMarkerIconForOperatorAndTypeAsync(operator: operator, iconType: IconType.Base);
-    await getMarkerIconForOperatorAndTypeAsync(operator: operator, iconType: IconType.Selected);
-    return _markerIcons[operator];
-  }
+  // Future<Map<IconType, BitmapDescriptor?>?> getMarkerIconsForOperator(Operator operator) async {
+  //   await getMarkerIconForOperatorAndTypeAsync(operator: operator, iconType: IconType.Base);
+  //   await getMarkerIconForOperatorAndTypeAsync(operator: operator, iconType: IconType.Selected);
+  //   return _markerIcons[operator];
+  // }
 
-  Future<BitmapDescriptor?> getMarkerIconForOperatorAndTypeAsync({Operator? operator, IconType iconType = IconType.Base}) async {
+  Future<BitmapDescriptor?> getMarkerIconForOperatorAndTypeAsync({Operator? operator, IconType iconType = IconType.Base, required BuildContext context}) async {
     if(operator == null) return null;
     if (_markerIcons[operator]?[iconType] != null) return _markerIcons[operator]![iconType];
     else {
@@ -75,15 +69,15 @@ class MapIcons {
     }
   }
   
-  BitmapDescriptor? getMarkerIconForOperatorAndType({Operator? operator, IconType iconType = IconType.Base, Function(BitmapDescriptor?)? callback}) {
-    if(operator == null) return null;
-    if(_markerIcons[operator]?[iconType] != null) return _markerIcons[operator]![iconType];
-    else {
-      if(callback != null) {
-        getMarkerIconForOperatorAndTypeAsync(operator: operator, iconType: iconType).then((icon) => callback(icon));
-      }
-      getMarkerIconForOperatorAndTypeAsync(operator: operator, iconType: iconType); // to cache
-      return _markerColours[operator];
-    }
-  }
+  // BitmapDescriptor? getMarkerIconForOperatorAndType({Operator? operator, IconType iconType = IconType.Base, Function(BitmapDescriptor?)? callback}) {
+  //   if(operator == null) return null;
+  //   if(_markerIcons[operator]?[iconType] != null) return _markerIcons[operator]![iconType];
+  //   else {
+  //     if(callback != null) {
+  //       getMarkerIconForOperatorAndTypeAsync(operator: operator, iconType: iconType).then((icon) => callback(icon));
+  //     }
+  //     getMarkerIconForOperatorAndTypeAsync(operator: operator, iconType: iconType); // to cache
+  //     return _markerColours[operator];
+  //   }
+  // }
 }
