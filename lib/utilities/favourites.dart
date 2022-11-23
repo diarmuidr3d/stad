@@ -35,7 +35,7 @@ class Favourites {
     return currentFavs;
   }
 
-  Future<List<String>> removeFavourite(String stopCode) async {
+  Future<List<String>?> removeFavourite(String stopCode) async {
     var myPrefs = await prefs;
     var currentFavs = await getFavourites();
     if (currentFavs != null) {

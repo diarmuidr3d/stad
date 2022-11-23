@@ -31,7 +31,7 @@ class JourneyDetailsState extends State<JourneyDetails> {
         setState(() {
           stopsBefore = stops;
         });
-        RealTimeUtilities().searchForBus(0, stops.length - 1, stopsBefore, widget.timing.journeyReference, _setAllInRangeToState);
+        RealTimeUtilities().searchForBus(0, stops.length - 1, stopsBefore, widget.timing.journeyReference ?? "", _setAllInRangeToState);
       });
     }
     return stopsBefore == null

@@ -26,12 +26,12 @@ class RealTimeList extends StatelessWidget {
             ? Text(Strings.noResults)
             : ListView.builder(
                 padding: const EdgeInsets.all(16.0),
-                itemCount: stopData.timings!.length,
+                itemCount: stopData!.timings!.length,
                 itemBuilder: (context, i) {
                     return RealTimeItem(
                       context: context,
-                      timing: stopData.timings![i],
-                      stop: stopData.stop,
+                      timing: stopData!.timings![i],
+                      stop: stopData!.stop,
                     );
                 }
               ),
@@ -95,7 +95,7 @@ class DublinBusItem extends RealTimeItem {
   Widget build(BuildContext context) {
     return ListTile(
       leading: Text(
-        timing.route,
+        timing.route ?? "",
         style: Styles.routeNumberStyle,
       ),
       title: Text(
