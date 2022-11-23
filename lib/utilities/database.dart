@@ -38,7 +38,7 @@ class RouteDB {
     return openDatabase(path, version: 1,);
   }
 
-  Future<List<Operator>> getOperatorsForStop(String stopCode) async {
+  Future<List<Operator?>> getOperatorsForStop(String stopCode) async {
     print("getOperatorsForStop");
     Database db = await databaseFuture;
     final result = await db.rawQuery(
@@ -134,7 +134,7 @@ class RouteDB {
     print("getPreviousStops");
     Database db = await databaseFuture;
     List<Map<String, dynamic>> results = await db.rawQuery(
-        'SELECT B.stop_code AS stopCode, address, latitude, longitude ' +
+        'SELECT B.stop_code AS stopCode, address, latitude, longitude, api_stop_code ' +
             ' FROM `stops` INNER JOIN ( ' +
             ' SELECT stop_code, sequence FROM `stop_for_route` WHERE ' +
             ' route_num = "'+route+'" AND inbound = '+inbound.toString()+' AND sequence != -1 ' +
@@ -142,7 +142,12 @@ class RouteDB {
             ' ORDER BY sequence; '
     );
     return results.map((obj) {
-      return StopVisited(obj["stopCode"], obj["address"], LatLng(double.parse(obj["latitude"]), double.parse(obj["longitude"])));
+      return StopVisited(
+          stopCode: obj["stopCode"],
+          apiStopCode: obj["api_stop_code"],
+          address: obj["address"],
+          latLng: LatLng(double.parse(obj["latitude"]), double.parse(obj["longitude"]))
+      );
     }).toList();
   }
 

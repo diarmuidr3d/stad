@@ -81,20 +81,20 @@ class RealTimeStopData {
 }
 
 class Timing {
-  String route;
+  String? route;
   String heading;
   int dueMins;
-  String journeyReference;
-  int inbound;
+  String? journeyReference;
+  int? inbound;
   bool realTime;
   LatLng? vehicleLocation;
 
   Timing({
-    required this.route,
+    this.route,
     required this.heading,
     required this.dueMins,
-    required this.journeyReference,
-    required this.inbound,
+    this.journeyReference,
+    this.inbound,
     this.realTime = true,
     this.vehicleLocation,
   });

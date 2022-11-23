@@ -6,16 +6,15 @@ import 'package:stad/widgets/search_app_bar.dart';
 import 'package:stad/widgets/search_stops.dart';
 
 class SearchView extends StatefulWidget {
-  final Function stopSelectCallback;
 
-  const SearchView({Key key, this.stopSelectCallback}) : super(key: key);
+  const SearchView({super.key});
   @override
   State<StatefulWidget> createState() => SearchViewState();
 }
 
 
 class SearchViewState extends State<SearchView> {
-  List<Map<String, dynamic>> searchedStops;
+  List<Map<String, dynamic>> searchedStops = [];
   final textController = TextEditingController();
 
   @override

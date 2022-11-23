@@ -19,9 +19,11 @@ class NearbyStopsState extends State<NearbyStops> {
   void initState() {
     super.initState();
     LocationManager().getLocationListener().then((locationListener){
-      locationListener.first.then((loc) async {
-        final stops = await RouteDB().getNearbyStopsOrderedByDistance(loc);
-        setState(() => nearbyStops = stops);
+      locationListener?.first.then((loc) async {
+        if(loc != null) {
+          final stops = await RouteDB().getNearbyStopsOrderedByDistance(loc);
+          setState(() => nearbyStops = stops);
+        }
       });
     });
   }

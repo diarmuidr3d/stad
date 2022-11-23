@@ -124,7 +124,7 @@ class SearchText extends StatelessWidget {
       );
     } else {
       return GestureDetector(
-        child: Text(Strings.search, style: _getInlineStyle(Theme.of(context)),),
+        child: Text(Strings.search!, style: _getInlineStyle(Theme.of(context)),),
         onTap: onTapCallback,
       );
     }

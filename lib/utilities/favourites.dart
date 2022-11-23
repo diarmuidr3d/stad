@@ -15,7 +15,7 @@ class Favourites {
   Favourites._internal();
 
 
-  Future<List<String>> getFavourites() async {
+  Future<List<String>?> getFavourites() async {
     var myPrefs = await prefs;
     return myPrefs.getStringList(Keys.favouriteStations);
   }

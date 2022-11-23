@@ -15,25 +15,26 @@ import 'package:stad/utilities/map_icons.dart';
 class TransitMap extends StatefulWidget {
   static const SOUTHWEST_BOUND = LatLng(51.294321, -10.576554);
   static const NORTHEAST_BOUND = LatLng(55.402704, -5.452611);
+  static const DEFAULT_CENTRE = LatLng(53.3834, -8.2177501);
 
   final Completer<GoogleMapController> controller;
   final Function onStopTapped;
-  final ArgumentCallback<LatLng> onMapTapped;
+  final ArgumentCallback<LatLng>? onMapTapped;
   final bool interactionEnabled;
-  final Stop stopToShow;
+  final Stop? stopToShow;
 
   final CameraPosition initialPosition;
 
   /// Builds a Google Map
   /// [onMapTapped] is only used if [interactionEnabled] is set to false.
   TransitMap({
-    @required this.controller,
-    @required this.onStopTapped,
-    @required this.interactionEnabled,
+    required this.controller,
+    required this.onStopTapped,
+    required this.interactionEnabled,
     this.onMapTapped,
     this.stopToShow,
     this.initialPosition = const CameraPosition(
-      target: LatLng(53.3834, -8.2177501),
+      target: DEFAULT_CENTRE,
       zoom: 7,
     ),
   }) : super(key: Keys.map);
@@ -48,13 +49,13 @@ class TransitMap extends StatefulWidget {
 class TransitMapState extends State<TransitMap> {
   Set<Marker> markers = {};
   final minimumZoom = 14; // The minimum zoom level required to see markers
-  CameraPosition? currentPosition;
+  CameraPosition currentPosition;
   LatLng? userPosition;
   RouteDB db = RouteDB();
   late MapIcons mapIcons;
 
   TransitMapState({
-    this.currentPosition
+    required this.currentPosition
   }) {
     mapIcons = MapIcons(context: context);
   }
@@ -63,28 +64,36 @@ class TransitMapState extends State<TransitMap> {
   void initState() {
     super.initState();
     /// If we're just showing the stop, we just want a static view, so don't care for user's location
-    if(widget.stopToShow != null) currentPosition = CameraPosition(target: widget.stopToShow.latLng, zoom: 17,);
+    if(widget.stopToShow != null) currentPosition = CameraPosition(target: widget.stopToShow!.latLng, zoom: 17,);
     if(widget.interactionEnabled) setupLocation();
   }
 
   /// Gets the user's location and moves the camera to that position.
   /// If there's a value in [widget.stopToShow], it moves the camera to that position instead.
   setupLocation() async {
-    print("setting up location");
     final locationManager = LocationManager();
-    userPosition = await locationManager.getLocation();
-    print("user is at $userPosition");
-    if(widget.stopToShow == null) {
-      currentPosition = CameraPosition(target: userPosition, zoom: 17,);
+    if(widget.stopToShow != null ) {
+      setCurrentPositionAndMoveCamera(userPosition);
     } else {
-      currentPosition = CameraPosition(target: widget.stopToShow.latLng, zoom: 17,);
+      print("setting up location");
+      userPosition = await locationManager.getLocation();
+      print("user is at $userPosition");
+      if(userPosition != null) {
+        setCurrentPositionAndMoveCamera(userPosition);
+      }
     }
-    moveCameraToPosition(currentPosition);
     final listener = await locationManager.getLocationListener();
-    listener.listen((loc) {
+    listener?.listen((loc) {
       userPosition = loc;
       print("userpos: $userPosition");
     });
+  }
+
+  setCurrentPositionAndMoveCamera(LatLng? latLng) {
+    if(latLng != null) {
+      currentPosition = CameraPosition(target: latLng, zoom: 17,);
+      moveCameraToPosition(currentPosition);
+    }
   }
 
   mapGestureRecognizers() {
@@ -133,7 +142,7 @@ class TransitMapState extends State<TransitMap> {
               icon: Icon(Icons.my_location),
               onPressed: () {
                 print(userPosition);
-                moveCameraToLatLng(userPosition);
+                setCurrentPositionAndMoveCamera(userPosition);
               }
           ),
         ),
@@ -145,17 +154,30 @@ class TransitMapState extends State<TransitMap> {
     db.getNearbyStopsIteratingRange(p.target).then((stops) {
         Iterable<Marker> markerMapList = stops.map((stop) {
           var iconType = IconType.Base;
-          if (widget.stopToShow != null && stop.stopCode == widget.stopToShow.stopCode) iconType = IconType.Selected;
-          return Marker(
-            icon: mapIcons.getMarkerIconForOperatorAndType(stop.operator, iconType, context),
-            markerId: MarkerId(stop.stopCode),
-            position: stop.latLng,
-            infoWindow: InfoWindow(title: stop.stopCode,
+          if (widget.stopToShow != null && stop.stopCode == widget.stopToShow!.stopCode) iconType = IconType.Selected;
+          var icon = mapIcons.getMarkerIconForOperatorAndType(operator: stop.operator, iconType: iconType);
+          if(icon != null) {
+            return Marker(
+              icon: icon,
+              markerId: MarkerId(stop.stopCode),
+              position: stop.latLng,
+              infoWindow: InfoWindow(title: stop.stopCode,
                 snippet: stop.address,
-            ),
-            onTap: () => _tapMarker(stop),
-            consumeTapEvents: !widget.interactionEnabled,
-          );
+              ),
+              onTap: () => _tapMarker(stop),
+              consumeTapEvents: !widget.interactionEnabled,
+            );
+          } else {
+            return Marker(
+              markerId: MarkerId(stop.stopCode),
+              position: stop.latLng,
+              infoWindow: InfoWindow(title: stop.stopCode,
+                snippet: stop.address,
+              ),
+              onTap: () => _tapMarker(stop),
+              consumeTapEvents: !widget.interactionEnabled,
+            );
+          }
         });
         setState(() {
           print("setting markers");

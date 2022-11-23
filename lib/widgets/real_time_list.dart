@@ -9,11 +9,11 @@ import 'package:stad/keys.dart';
 import 'package:stad/utilities/favourites.dart';
 
 class RealTimeList extends StatelessWidget {
-  final RealTimeStopData stopData;
+  final RealTimeStopData? stopData;
   final bool loading;
 
   RealTimeList({
-    required this.stopData,
+    this.stopData,
     required this.loading,
   }) : super(key: Keys.realTimeList);
 
@@ -22,7 +22,7 @@ class RealTimeList extends StatelessWidget {
     return Container(
       child: loading
           ? Center(child: CircularProgressIndicator())
-          : stopData.timings == null || stopData.timings!.isEmpty
+          : stopData?.timings == null || stopData!.timings!.isEmpty
             ? Text(Strings.noResults)
             : ListView.builder(
                 padding: const EdgeInsets.all(16.0),

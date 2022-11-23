@@ -17,7 +17,7 @@ import 'package:stad/widgets/map.dart';
 import '../styles.dart';
 
 class HomeView extends StatefulWidget {
-  final Stop stopToShow;
+  final Stop? stopToShow;
 
   const HomeView({this.stopToShow});
 
@@ -26,9 +26,6 @@ class HomeView extends StatefulWidget {
 }
 
 class HomeViewState extends State<HomeView> {
-  List<String> currentFavourites;
-  List searchedStops;
-  Stop selectedStop;
   GlobalKey<ScaffoldState> key = GlobalKey<ScaffoldState>();
   final TextEditingController searchFieldController = TextEditingController();
   var mapCompleter = Completer<GoogleMapController>();
@@ -36,8 +33,6 @@ class HomeViewState extends State<HomeView> {
   @override
   void initState() {
     super.initState();
-    Favourites().getFavourites().then((favourites) =>
-        setState(() => currentFavourites = favourites));
   }
 
   @override
@@ -74,7 +69,6 @@ class HomeViewState extends State<HomeView> {
               scaffoldKey: key,
               onTapCallback: () => startSearching(context),
               searching: false,
-              handleInputCallback: () {},
               textFieldController: searchFieldController,
             )
         )

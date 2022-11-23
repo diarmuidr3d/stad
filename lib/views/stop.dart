@@ -16,8 +16,8 @@ class StopView extends StatefulWidget {
   final Stop stop;
 
   const StopView({
-    Key key,
-    @required this.stop
+    Key? key,
+    required this.stop
   }) : super(key: key);
 
   @override
@@ -28,15 +28,16 @@ class StopView extends StatefulWidget {
 class StopViewState extends State<StopView> {
 
   var loading = true;
-  var stopData = RealTimeStopData();
+  RealTimeStopData? stopData;
   final textController = TextEditingController();
-  bool isFavourite;
-  bool getTimingsScheduled;
+  bool? isFavourite;
+  bool getTimingsScheduled = false;
 
 
   @override
   void initState() {
     super.initState();
+    stopData = RealTimeStopData(stop: widget.stop);
     getTimings(widget.stop);
     Favourites().isFavourite(widget.stop.stopCode).then((isFav) => setState(() => isFavourite = isFav));
   }
@@ -70,7 +71,7 @@ class StopViewState extends State<StopView> {
             Divider(),
             Expanded(child:
               RealTimeList(
-                stopData: stopData,
+                stopData: stopData!,
                 loading: loading,
               )
             )
@@ -83,7 +84,6 @@ class StopViewState extends State<StopView> {
                 scaffoldKey: Keys.viewStopScaffoldKey,
                 onTapCallback: () => startSearching(context),
                 searching: false,
-                handleInputCallback: () {},
                 textFieldController: textController,
               )
           )
@@ -103,7 +103,6 @@ class StopViewState extends State<StopView> {
     setState(() => loading = true);
     RealTimeUtilities.getStopTimings(stop).then((stopData) {
       setState(() {
-        print(stopData);
         this.stopData = stopData;
         loading = false;
       });
@@ -121,13 +120,13 @@ class StopViewState extends State<StopView> {
 
   IconButton getFavIcon() {
     return IconButton(
-        icon: isFavourite != null && isFavourite ? Icon(Icons.favorite, color: Colors.red,) : Icon(Icons.favorite_border,),
+        icon: isFavourite != null && isFavourite! ? Icon(Icons.favorite, color: Colors.red,) : Icon(Icons.favorite_border,),
         onPressed: () {
-          if (isFavourite == null || !isFavourite) {
-            Favourites().addFavourite(stopData.stop.stopCode);
+          if (isFavourite == null || !isFavourite!) {
+            Favourites().addFavourite(stopData!.stop.stopCode);
             setState(() => isFavourite = true);
           } else {
-            Favourites().removeFavourite(stopData.stop.stopCode);
+            Favourites().removeFavourite(stopData!.stop.stopCode);
             setState(() => isFavourite = false);
           }
         }

@@ -54,14 +54,15 @@ class DublinBusAPI implements RealTimeAPI {
   }
 
   static Timing getDetailsFromStopDataXml(element) {
-    Timing details = new Timing();
-    details.route = element.xpath('/MonitoredVehicleJourney_PublishedLineName/text()')[0].name;
-    details.heading = element.xpath('/MonitoredVehicleJourney_DestinationName/text()')[0].name;
-    details.dueMins = DateTime.parse(
-        element.xpath('/MonitoredCall_ExpectedDepartureTime/text()')[0].name)
-        .difference(DateTime.now()).inMinutes;
-    details.inbound = element.xpath('/MonitoredVehicleJourney_DirectionRef/text()')[0].name == "Inbound" ? 1 : 0;
-    details.realTime = element.xpath('/MonitoredVehicleJourney_Monitored/text()')[0].name == "true" ? true : false;
+    Timing details = new Timing(
+      route: element.xpath('/MonitoredVehicleJourney_PublishedLineName/text()')[0].name,
+      heading: element.xpath('/MonitoredVehicleJourney_DestinationName/text()')[0].name,
+      dueMins: DateTime.parse(
+            element.xpath('/MonitoredCall_ExpectedDepartureTime/text()')[0].name)
+            .difference(DateTime.now()).inMinutes,
+      inbound: element.xpath('/MonitoredVehicleJourney_DirectionRef/text()')[0].name == "Inbound" ? 1 : 0,
+      realTime: element.xpath('/MonitoredVehicleJourney_Monitored/text()')[0].name == "true" ? true : false,
+    );
     final journeyElement = element.xpath('/MonitoredVehicleJourney_VehicleRef/text()');
     if (journeyElement != null) details.journeyReference = journeyElement[0].name;
     return details;
@@ -120,11 +121,12 @@ class IarnrodEireannAPI  implements RealTimeAPI {
     var timings;
     if (xmlStopData != null) {
       timings = xmlStopData.map((element){
-        Timing details = new Timing();
-        details.route = element.xpath('/Traincode/text()')[0].name;
-        details.heading = element.xpath('/Destination/text()')[0].name;
-        details.journeyReference = element.xpath('/Traincode/text()')[0].name;
-        details.dueMins = int.parse(element.xpath('/Duein/text()')[0].name);
+        Timing details = new Timing(
+          route: element.xpath('/Traincode/text()')[0].name,
+          heading: element.xpath('/Destination/text()')[0].name,
+          journeyReference: element.xpath('/Traincode/text()')[0].name,
+          dueMins: int.parse(element.xpath('/Duein/text()')[0].name),
+        );
 //        TODO: Figure out how to parse direction for irish rail
 //        details.inbound = element.xpath('/MonitoredVehicleJourney_DirectionRef/text()')[0].name == "Inbound" ? 1 : 0;
         return details;
@@ -221,7 +223,6 @@ class RealTimeUtilities {
 
   static Future<RealTimeStopData> getStopTimings(Stop stop) async {
     final stopData = RealTimeStopData(stop: stop);
-    if (stop.operator == null) throw Exception("No operator for stop ${stop.stopCode}");
     try {
       switch (stop.operator) {
         case Operator.BusEireann:
@@ -237,9 +238,11 @@ class RealTimeUtilities {
         case Operator.Luas:
           stopData.timings = await LuasAPI().getTimings(stop.stopCode);
           break;
+        case null:
+          throw Exception("No operator for stop ${stop.stopCode}");
       }
     } catch (SocketException) {}
-    if (stopData.timings != null) stopData.timings.sort((a, b) => a.dueMins.compareTo(b.dueMins));
+    if (stopData.timings != null) stopData.timings!.sort((a, b) => a.dueMins.compareTo(b.dueMins));
     return stopData;
   }
 
