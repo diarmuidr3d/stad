@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stad/models.dart';
+import 'package:stad/models/models.dart';
 import 'package:stad/utilities/database.dart';
 import 'package:stad/utilities/location_manager.dart';
 import 'package:stad/views/stop.dart';

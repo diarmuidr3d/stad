@@ -1,4 +1,6 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:stad/models/route.dart';
+import 'package:stad/models/trip.dart';
 
 enum Operator {DublinBus, IarnrodEireann, BusEireann, Luas}
 
@@ -8,31 +10,6 @@ final allOperators = {
   "Bus Éireann": Operator.BusEireann,
   "Luas": Operator.Luas,
 };
-
-class Route {
-  String number;
-  String towards;
-  String from;
-  List<RouteDirection> directions;
-  Route({
-    required this.number,
-    required this.towards,
-    required this.from,
-    required this.directions
-  });
-}
-
-class RouteDirection {
-  Route route;
-  String dirName;
-  String dirCode;
-  List<Stop> stops = [];
-  RouteDirection({
-    required this.route,
-    required this.dirName,
-    required this.dirCode,
-  });
-}
 
 class Stop {
   String stopCode;
@@ -87,7 +64,7 @@ class Timing {
   String? journeyReference;
   int? inbound;
   bool realTime;
-  LatLng? vehicleLocation;
+  Trip? trip;
 
   Timing({
     this.route,
@@ -96,7 +73,7 @@ class Timing {
     this.journeyReference,
     this.inbound,
     this.realTime = true,
-    this.vehicleLocation,
+    this.trip,
   });
 
   String toString() => "$route - $heading: $dueMins mins";

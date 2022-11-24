@@ -1,16 +1,19 @@
-import 'dart:convert';
 import 'dart:core';
-import 'dart:io';
 
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:xpath/xpath.dart';
 
-import 'package:stad/models.dart';
-import 'package:stad/utilities/database.dart';
+import 'package:stad/models/models.dart';
+
+import '../../models/trip.dart';
+import 'bus_eireann.dart';
 
 abstract class RealTimeAPI {
 
   Future<List<Timing>> getTimings(String stopCode);
+
+  Future<LatLng?> getVehicleLocationForTrip(Trip trip);
 }
 
 class DublinBusAPI implements RealTimeAPI {
@@ -99,6 +102,12 @@ class DublinBusAPI implements RealTimeAPI {
     return searchForBus(left, right, stopList, journeyRef, callback);
   }
 
+  @override
+  Future<LatLng?> getVehicleLocationForTrip(Trip trip) {
+    // TODO: implement getVehicleLocation
+    throw UnimplementedError();
+  }
+
 }
 
 class IarnrodEireannAPI  implements RealTimeAPI {
@@ -135,49 +144,15 @@ class IarnrodEireannAPI  implements RealTimeAPI {
     return timings;
   }
 
-}
-
-class BusEireannAPI  implements RealTimeAPI {
-
-  Future<Map<String, dynamic>> _getRealTimeStopDataTree(String stopCode) async {
-    HttpClient client = new HttpClient();
-    client.badCertificateCallback =((X509Certificate cert, String host, int port) => true);
-    HttpClientRequest request = await client.openUrl("GET", Uri.parse('http://buseireann.ie/inc/proto/stopPassageTdi.php?stop_point=$stopCode'));
-    HttpClientResponse response = await request.close();
-    String reply = await response.transform(utf8.decoder).join();
-    return jsonDecode(reply)["stopPassageTdi"];
-  }
-
   @override
-  Future<List<Timing>> getTimings(String stopCode) async {
-    print(stopCode);
-    var stopMap = await _getRealTimeStopDataTree(stopCode);
-    print(stopMap);
-    var timings = <Timing>[];
-    for (var v in stopMap.values) {
-      if (v != 0 && v["departure_data"] != null) {
-        final departureData = v["departure_data"];
-        if (departureData == null) break; // TODO: handle arrivals
-        final routeNum = await RouteDB().getRouteNumForApiNum(
-            v["route_duid"]["duid"]);
-        final realTime = departureData["actual_passage_time_utc"] != null;
-        final dueTime = realTime ? departureData["actual_passage_time_utc"] : departureData["scheduled_passage_time_utc"];
-        final dueIn = DateTime.fromMillisecondsSinceEpoch(dueTime * 1000)
-            .difference(DateTime.now()).inMinutes;
-        if (dueIn > 0)
-          timings.add(Timing(
-            dueMins: dueIn,
-            heading: departureData["multilingual_direction_text"]["defaultValue"],
-            journeyReference: v["trip_duid"]["duid"],
-            route: routeNum,
-            realTime: realTime
-          ));
-      }
-    }
-    return timings;
+  Future<LatLng?> getVehicleLocationForTrip(Trip trip) {
+    // TODO: implement getVehicleLocation
+    throw UnimplementedError();
   }
 
 }
+
+
 
 class LuasAPI  implements RealTimeAPI {
 
@@ -215,6 +190,12 @@ class LuasAPI  implements RealTimeAPI {
       };
     }
     return timings;
+  }
+
+  @override
+  Future<LatLng?> getVehicleLocationForTrip(Trip trip) {
+    // TODO: implement getVehicleLocation
+    throw UnimplementedError();
   }
 
 }

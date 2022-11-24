@@ -3,9 +3,9 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stad/keys.dart';
-import 'package:stad/models.dart';
+import 'package:stad/models/models.dart';
 import 'package:stad/styles.dart';
-import 'package:stad/utilities/real_time_apis.dart';
+import 'package:stad/utilities/apis/real_time_apis.dart';
 import 'package:stad/utilities/favourites.dart';
 import 'package:stad/views/home.dart';
 import 'package:stad/widgets/map.dart';
@@ -67,7 +67,7 @@ class StopViewState extends State<StopView> {
               if(loading) CircularProgressIndicator()
               else IconButton(icon: Icon(Icons.refresh), onPressed: () => getTimings(widget.stop),),
               getFavIcon(),
-            ]),
+            ],),
             Divider(),
             Expanded(child:
               RealTimeList(

@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:stad/models.dart';
+import 'package:stad/models/models.dart';
 import 'package:stad/utilities/location_manager.dart';
 
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -22,6 +22,7 @@ class TransitMap extends StatefulWidget {
   final ArgumentCallback<LatLng>? onMapTapped;
   final bool interactionEnabled;
   final Stop? stopToShow;
+  final Set<Marker>? additionalMarkers;
 
   final CameraPosition initialPosition;
 
@@ -37,6 +38,7 @@ class TransitMap extends StatefulWidget {
       target: DEFAULT_CENTRE,
       zoom: 7,
     ),
+    this.additionalMarkers,
   }) : super(key: Keys.map);
 
 
@@ -66,6 +68,9 @@ class TransitMapState extends State<TransitMap> {
     /// If we're just showing the stop, we just want a static view, so don't care for user's location
     if(widget.stopToShow != null) currentPosition = CameraPosition(target: widget.stopToShow!.latLng, zoom: 17,);
     if(widget.interactionEnabled) setupLocation();
+    if(widget.additionalMarkers != null) {
+      markers = widget.additionalMarkers!;
+    }
   }
 
   /// Gets the user's location and moves the camera to that position.
@@ -183,6 +188,9 @@ class TransitMapState extends State<TransitMap> {
         setState(() {
           print("setting markers");
           markers = iterableMarkers.toSet();
+          if(widget.additionalMarkers != null) {
+            markers = markers.union(widget.additionalMarkers!);
+          }
           currentPosition = p;
         });
       }

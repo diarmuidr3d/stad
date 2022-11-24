@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stad/models.dart';
+import 'package:stad/models/models.dart';
 import 'package:stad/styles.dart';
 import 'package:stad/utilities/favourites.dart';
 import 'package:stad/utilities/map_icons.dart';

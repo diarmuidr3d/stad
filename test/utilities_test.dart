@@ -1,6 +1,6 @@
 
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:stad/models.dart';
+import 'package:stad/models/models.dart';
 
 import 'package:xpath/xpath.dart';
 import 'package:flutter_test/flutter_test.dart';

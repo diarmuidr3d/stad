@@ -1,12 +1,15 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import 'package:stad/models.dart';
+import 'package:stad/models/models.dart';
 import 'package:stad/resources/strings.dart';
 import 'package:stad/styles.dart';
-import 'package:stad/utilities/real_time_apis.dart';
+import 'package:stad/utilities/apis/real_time_apis.dart';
 import 'package:stad/keys.dart';
 import 'package:stad/utilities/favourites.dart';
+import 'package:stad/widgets/real_time_list/bus_eireann.dart';
+
+import '../views/trip.dart';
 
 class RealTimeList extends StatelessWidget {
   final RealTimeStopData? stopData;
@@ -55,6 +58,8 @@ class RealTimeItem extends StatelessWidget {
   Widget build(BuildContext context) {
     if(stop.operator == Operator.IarnrodEireann || stop.operator == Operator.Luas) {
       return IarnrodItem(timing: timing, context: context, stop: stop);
+    } else if (stop.operator == Operator.BusEireann) {
+      return BusEireannItem(timing: timing, context: context, stop: stop);
     } else {
       return DublinBusItem(timing: timing, context: context, stop: stop);
     }

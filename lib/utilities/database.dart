@@ -10,7 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'package:stad/keys.dart';
-import 'package:stad/models.dart';
+import 'package:stad/models/models.dart';
 
 class RouteDB {
   static final RouteDB _singleton = new RouteDB._internal();

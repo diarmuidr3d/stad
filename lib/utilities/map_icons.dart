@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:stad/models.dart';
+import 'package:stad/models/models.dart';
 
 enum IconType {Base, Selected}
 
 class MapIcons {
+
+  final busMarkerColour = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange);
 
   final _markerColours = <Operator, BitmapDescriptor>{
     Operator.DublinBus: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow),
