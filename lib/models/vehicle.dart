@@ -1,11 +1,19 @@
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:stad/utilities/apis/real_time_apis.dart';
+import 'package:stad/models/locatable.dart';
 
-class Vehicle {
+class Vehicle implements Locatable {
   String? id;
-  LatLng? location;
+  GeoLocation? location;
 
   Vehicle({this.id, this.location});
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    } else {
+      return other is Vehicle && other.id == id;
+    }
+  }
 
   String toString() => "Vehicle: $id at $location";
 }

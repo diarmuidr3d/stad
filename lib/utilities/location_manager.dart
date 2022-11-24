@@ -24,14 +24,11 @@ class LocationManager {
 
   Future<bool> requestPermission() async {
     bool serviceStatus = await _location.serviceEnabled();
-    print("Service status: $serviceStatus");
     if (serviceStatus) {
       bool _permission = (await _location.requestPermission()) == PermissionStatus.granted;
-      print("Permission: $_permission");
       return _permission;
     } else {
       bool serviceStatusResult = await _location.requestService();
-      print("Service status activated after request: $serviceStatusResult");
       if(serviceStatusResult){
         return await checkForPermission();
       }
@@ -41,13 +38,9 @@ class LocationManager {
 
   /// Returns the current user location as a [LatLng]
   Future<LatLng?> getLocation() async {
-    print("getLocation get permission");
     final permission = await checkForPermission();
-    print("getLocation Permission: $permission");
     if (!permission) return null;
-    print("has permission, get location");
     final locationData = await _location.getLocation();
-    print("locationdata: $locationData");
     return locationDataToLatLng(locationData);
   }
 
@@ -59,7 +52,6 @@ class LocationManager {
 
   /// Returns a stream of [LatLng]s for the current user location
   Future<Stream<LatLng?>?> getLocationListener() async {
-    print("getListener get permission");
     if (!await checkForPermission()) return null;
     if(_onChanged == null) {
       _onChanged = _location.onLocationChanged.map(

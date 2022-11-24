@@ -1,6 +1,7 @@
 import 'dart:core';
 import 'dart:io';
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -10,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'package:stad/keys.dart';
+import 'package:stad/models/locatable.dart';
 import 'package:stad/models/models.dart';
 
 class RouteDB {
@@ -39,7 +41,6 @@ class RouteDB {
   }
 
   Future<List<Operator?>> getOperatorsForStop(String stopCode) async {
-    print("getOperatorsForStop");
     Database db = await databaseFuture;
     final result = await db.rawQuery(
         'SELECT operator FROM `stop_served_by_operator` WHERE ' +
@@ -49,7 +50,6 @@ class RouteDB {
   }
 
   Future<List<Map<String, dynamic>>> getStopsMatchingParm(String searchText) async {
-    print("getStopsMatchingParm");
     RegExp numRegex = new RegExp(r"^\s*(\d)+\s*$");
     if (numRegex.hasMatch(searchText)) {
       return _getStopsMatchingInt(int.parse(searchText.trim()));
@@ -146,7 +146,10 @@ class RouteDB {
           stopCode: obj["stopCode"],
           apiStopCode: obj["api_stop_code"],
           address: obj["address"],
-          latLng: LatLng(double.parse(obj["latitude"]), double.parse(obj["longitude"]))
+          location: GeoLocation(
+              latitude: double.parse(obj["latitude"]),
+              longitude: double.parse(obj["longitude"])
+          ),
       );
     }).toList();
   }

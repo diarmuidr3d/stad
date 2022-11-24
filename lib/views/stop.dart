@@ -55,7 +55,7 @@ class StopViewState extends State<StopView> {
                   onStopTapped: onTapMap,
                   onMapTapped: onTapMap,
                   interactionEnabled: false,
-                  stopToShow: widget.stop,
+                  locatableToShow: widget.stop,
                 ),
               ),
             Row(children: <Widget>[

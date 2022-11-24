@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:stad/keys.dart';
+import 'package:stad/models/locatable.dart';
 import 'package:stad/models/models.dart';
 import 'package:stad/styles.dart';
 import 'package:stad/utilities/apis/real_time_apis.dart';
@@ -35,7 +36,7 @@ class TripViewState extends State<TripView> {
 
   var loading = true;
   bool getTimingsScheduled = false;
-  LatLng? location;
+  GeoLocation? location;
 
   @override
   void initState() {
@@ -56,11 +57,22 @@ class TripViewState extends State<TripView> {
                   onStopTapped: onTapMap,
                   onMapTapped: onTapMap,
                   interactionEnabled: true,
-                  stopToShow: widget.stop,
+                  locatableToShow: widget.trip.vehicle,
                   additionalMarkers: marker != null ? {marker} : {},
                 ),
               ),
           ],),
+          Positioned(
+              top: 0.0,
+              left: 0.0,
+              right: 0.0,
+              child: SearchAppBar(
+                scaffoldKey: Keys.viewStopScaffoldKey,
+                onTapCallback: () => startSearching(context),
+                searching: false,
+                textFieldController: TextEditingController(),
+              )
+          )
         ],)
     );
   }
@@ -70,11 +82,15 @@ class TripViewState extends State<TripView> {
       return Marker(
         icon: MapIcons().busMarkerColour,
         markerId: MarkerId(widget.trip.id),
-        position: location!,
+        position: location!.toLatLng(),
         infoWindow: InfoWindow(title: "BUS"),
       );
     }
     return null;
+  }
+
+  void startSearching(BuildContext context) {
+    Navigator.of(context, rootNavigator: true).pop();
   }
 
   void onTapMap (latLng) {
@@ -85,7 +101,7 @@ class TripViewState extends State<TripView> {
     if(loading != true) {
       setState(() => loading = true);
     }
-    LatLng? _location = await widget.trip.currentLocation();
+    GeoLocation? _location = await widget.trip.currentVehicleLocation();
     if(_location != null) {
       setState(() {
         location = _location;

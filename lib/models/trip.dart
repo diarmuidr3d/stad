@@ -1,4 +1,5 @@
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+
+import 'package:stad/models/locatable.dart';
 import 'package:stad/models/route.dart';
 import 'package:stad/models/vehicle.dart';
 
@@ -10,11 +11,12 @@ class Trip {
   RouteDirection? routeDirection;
   RealTimeAPI? api;
 
-  Trip({required this.id, this.api});
+  Trip({required this.id, this.api, this.vehicle});
 
-  Future<LatLng?> currentLocation() async {
+  Future<GeoLocation?> currentVehicleLocation() async {
     if(this.api != null) {
-      return api!.getVehicleLocationForTrip(this);
+      final vehicleLocation = api!.getVehicleLocationForTrip(this);
+      return vehicleLocation;
     }
   }
 

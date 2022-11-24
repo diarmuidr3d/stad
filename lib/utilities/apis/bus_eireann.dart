@@ -2,8 +2,9 @@ import 'dart:convert';
 import 'dart:core';
 import 'dart:io';
 
-import 'package:google_maps_flutter_platform_interface/src/types/location.dart';
+import 'package:stad/models/locatable.dart';
 import 'package:stad/models/models.dart';
+import 'package:stad/models/vehicle.dart';
 import 'package:stad/utilities/apis/real_time_apis.dart';
 
 import '../../models/trip.dart';
@@ -52,16 +53,33 @@ class BusEireannAPI  implements RealTimeAPI {
 
   Trip? parseTrip(stopValues) {
     if(stopValues["trip_duid"]["duid"] != null) {
-      return Trip(id: stopValues["trip_duid"]["duid"], api: this);
+      return Trip(
+        id: stopValues["trip_duid"]["duid"],
+        api: this,
+        vehicle: parseVehicle(stopValues),
+      );
     }
     return null;
   }
 
-  LatLng? parseStopPassageAndGetVehicleLocation(stopValues) {
+  Vehicle? parseVehicle(stopValues) {
+    if(stopValues["vehicle_duid"]["duid"] != null) {
+      return Vehicle(
+        id: stopValues["vehicle_duid"]["duid"],
+        location: _beLatLngToGeoLocation(
+            latitude: stopValues["latitude"],
+            longitude: stopValues["longitude"]
+        ),
+      );
+    }
+    return null;
+  }
+
+  GeoLocation? parseStopPassageAndGetVehicleLocation(stopValues) {
     if (stopValues != 0 && stopValues["latitude"] != null && stopValues["longitude"] != null) {
-      return LatLng(
-          be_lat_or_lon_to_degree(stopValues["latitude"]),
-          be_lat_or_lon_to_degree(stopValues["longitude"])
+      return GeoLocation(
+          latitude: _be_lat_or_lon_to_degree(stopValues["latitude"]),
+          longitude: _be_lat_or_lon_to_degree(stopValues["longitude"])
       );
     }
     return null;
@@ -79,20 +97,28 @@ class BusEireannAPI  implements RealTimeAPI {
   }
 
   @override
-  Future<LatLng?> getVehicleLocationForTrip(Trip trip) async {
+  Future<GeoLocation?> getVehicleLocationForTrip(Trip trip) async {
     var stopMap = await _getRealTimeTripDataTree(trip);
-    LatLng? location;
+    GeoLocation? location;
     for (var v in stopMap.values) {
-      final latLng = parseStopPassageAndGetVehicleLocation(v);
-      if(latLng != null) {
-        location = latLng;
+      final _location = parseStopPassageAndGetVehicleLocation(v);
+      if(_location != null) {
+        location = _location;
+        trip.vehicle?.location = location;
         break;
       }
     }
     return location;
   }
 
-  double be_lat_or_lon_to_degree(int lat_or_lon) {
+  GeoLocation _beLatLngToGeoLocation({required int latitude, required int longitude}) {
+    return GeoLocation(
+        latitude: _be_lat_or_lon_to_degree(latitude),
+        longitude: _be_lat_or_lon_to_degree(longitude),
+    );
+  }
+
+  double _be_lat_or_lon_to_degree(int lat_or_lon) {
     return lat_or_lon / 3600000.0;
   }
 

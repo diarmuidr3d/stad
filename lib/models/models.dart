@@ -1,4 +1,5 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:stad/models/locatable.dart';
 import 'package:stad/models/route.dart';
 import 'package:stad/models/trip.dart';
 
@@ -11,18 +12,18 @@ final allOperators = {
   "Luas": Operator.Luas,
 };
 
-class Stop {
+class Stop implements Locatable {
   String stopCode;
   String address;
-  LatLng latLng;
   String apiStopCode;
   Operator? operator;
+  GeoLocation location;
   List<RouteDirection> servedBy = [];
   Stop({
     required this.stopCode,
     required this.apiStopCode,
     required this.address,
-    required this.latLng,
+    required this.location,
     this.operator
   });
 
@@ -33,9 +34,25 @@ class Stop {
       stopCode: map["stop_code"],
       address: map["address"],
       apiStopCode: map["api_stop_code"],
-      latLng: LatLng(double.parse(map["latitude"]), double.parse(map["longitude"])),
+      location: GeoLocation(latitude: double.parse(map["latitude"]), longitude: double.parse(map["longitude"])),
       operator: allOperators[map["operator"]]
     );
+  }
+
+  get latLng {
+    return location.toLatLng();
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if(other.runtimeType != Stop) {
+      return false;
+    } else {
+      Stop otherStop = other as Stop;
+      return operator == otherStop.operator &&
+          apiStopCode == otherStop.apiStopCode &&
+          stopCode == otherStop.stopCode;
+    }
   }
 }
 
@@ -44,11 +61,11 @@ enum StopState {UNKNOWN, UNVISITED, VISITING, VISITED, LOADING}
 class StopVisited extends Stop {
   StopState state = StopState.LOADING;
   StopVisited({
-    required String stopCode,
-    required String address,
-    required LatLng latLng,
-    required String apiStopCode
-  }) : super(stopCode: stopCode, address: address, latLng: latLng, apiStopCode: apiStopCode);
+    required super.stopCode,
+    required super.address,
+    required super.location,
+    required super.apiStopCode
+  });
 }
 
 class RealTimeStopData {

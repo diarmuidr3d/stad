@@ -1,7 +1,7 @@
 import 'dart:core';
 
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:stad/models/locatable.dart';
 import 'package:xpath/xpath.dart';
 
 import 'package:stad/models/models.dart';
@@ -13,7 +13,7 @@ abstract class RealTimeAPI {
 
   Future<List<Timing>> getTimings(String stopCode);
 
-  Future<LatLng?> getVehicleLocationForTrip(Trip trip);
+  Future<GeoLocation?> getVehicleLocationForTrip(Trip trip);
 }
 
 class DublinBusAPI implements RealTimeAPI {
@@ -80,7 +80,6 @@ class DublinBusAPI implements RealTimeAPI {
         if (journeyReference == journeyRef) return true;
       }
     }
-    print("no journey ref for " + stopCode + " - " + journeyRef);
     return false;
   }
 
@@ -103,7 +102,7 @@ class DublinBusAPI implements RealTimeAPI {
   }
 
   @override
-  Future<LatLng?> getVehicleLocationForTrip(Trip trip) {
+  Future<GeoLocation?> getVehicleLocationForTrip(Trip trip) {
     // TODO: implement getVehicleLocation
     throw UnimplementedError();
   }
@@ -145,7 +144,7 @@ class IarnrodEireannAPI  implements RealTimeAPI {
   }
 
   @override
-  Future<LatLng?> getVehicleLocationForTrip(Trip trip) {
+  Future<GeoLocation?> getVehicleLocationForTrip(Trip trip) {
     // TODO: implement getVehicleLocation
     throw UnimplementedError();
   }
@@ -167,7 +166,6 @@ class LuasAPI  implements RealTimeAPI {
         }
     );
     http.Response response = await http.get(luasRTPI);
-    print(response.body);
     return ETree.fromString(response.body);
   }
 
@@ -193,7 +191,7 @@ class LuasAPI  implements RealTimeAPI {
   }
 
   @override
-  Future<LatLng?> getVehicleLocationForTrip(Trip trip) {
+  Future<GeoLocation?> getVehicleLocationForTrip(Trip trip) {
     // TODO: implement getVehicleLocation
     throw UnimplementedError();
   }

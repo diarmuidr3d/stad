@@ -52,7 +52,7 @@ class HomeViewState extends State<HomeView> {
                   controller: mapCompleter,
                   onStopTapped: viewStop,
                   interactionEnabled: true,
-                  stopToShow: widget.stopToShow,
+                  locatableToShow: widget.stopToShow,
                 ),
               ),
               if(widget.stopToShow == null) DragBar(),

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:stad/models/locatable.dart';
 import 'package:stad/models/models.dart';
 import 'package:stad/utilities/location_manager.dart';
 
@@ -21,8 +22,9 @@ class TransitMap extends StatefulWidget {
   final Function onStopTapped;
   final ArgumentCallback<LatLng>? onMapTapped;
   final bool interactionEnabled;
-  final Stop? stopToShow;
+  final Locatable? locatableToShow;
   final Set<Marker>? additionalMarkers;
+  final Stop? selectedStop;
 
   final CameraPosition initialPosition;
 
@@ -33,12 +35,13 @@ class TransitMap extends StatefulWidget {
     required this.onStopTapped,
     required this.interactionEnabled,
     this.onMapTapped,
-    this.stopToShow,
+    this.locatableToShow,
     this.initialPosition = const CameraPosition(
       target: DEFAULT_CENTRE,
       zoom: 7,
     ),
     this.additionalMarkers,
+    this.selectedStop,
   }) : super(key: Keys.map);
 
 
@@ -66,23 +69,21 @@ class TransitMapState extends State<TransitMap> {
   void initState() {
     super.initState();
     /// If we're just showing the stop, we just want a static view, so don't care for user's location
-    if(widget.stopToShow != null) currentPosition = CameraPosition(target: widget.stopToShow!.latLng, zoom: 17,);
-    if(widget.interactionEnabled) setupLocation();
-    if(widget.additionalMarkers != null) {
-      markers = widget.additionalMarkers!;
+    if(widget.locatableToShow != null && widget.locatableToShow!.location != null) {
+      currentPosition = CameraPosition(
+        target: widget.locatableToShow!.location!.toLatLng(), zoom: 17,);
     }
+    if(widget.interactionEnabled) setupLocation();
   }
 
   /// Gets the user's location and moves the camera to that position.
-  /// If there's a value in [widget.stopToShow], it moves the camera to that position instead.
+  /// If there's a value in [widget.locatableToShow], it moves the camera to that position instead.
   setupLocation() async {
     final locationManager = LocationManager();
-    if(widget.stopToShow != null ) {
+    if(widget.locatableToShow != null ) {
       setCurrentPositionAndMoveCamera(userPosition);
     } else {
-      print("setting up location");
       userPosition = await locationManager.getLocation();
-      print("user is at $userPosition");
       if(userPosition != null) {
         setCurrentPositionAndMoveCamera(userPosition);
       }
@@ -90,7 +91,6 @@ class TransitMapState extends State<TransitMap> {
     final listener = await locationManager.getLocationListener();
     listener?.listen((loc) {
       userPosition = loc;
-      print("userpos: $userPosition");
     });
   }
 
@@ -111,6 +111,9 @@ class TransitMapState extends State<TransitMap> {
 
   @override
   Widget build(BuildContext context) {
+    if(widget.additionalMarkers != null) {
+      markers = markers.union(widget.additionalMarkers!);
+    }
     return Stack(children: <Widget>[
       GoogleMap(
         initialCameraPosition: currentPosition,
@@ -121,7 +124,7 @@ class TransitMapState extends State<TransitMap> {
         scrollGesturesEnabled: widget.interactionEnabled,
         tiltGesturesEnabled: widget.interactionEnabled,
         zoomGesturesEnabled: widget.interactionEnabled,
-        myLocationButtonEnabled: widget.stopToShow != null && widget.interactionEnabled,
+        myLocationButtonEnabled: widget.locatableToShow != null && widget.interactionEnabled,
         zoomControlsEnabled: false,
         myLocationEnabled: true,
         compassEnabled: false,
@@ -132,7 +135,7 @@ class TransitMapState extends State<TransitMap> {
         gestureRecognizers: widget.interactionEnabled ? mapGestureRecognizers() : {},
         onTap: widget.interactionEnabled ? (latLng) {} : widget.onMapTapped,
       ),
-      if (widget.interactionEnabled && widget.stopToShow == null) Positioned(
+      if (widget.interactionEnabled && widget.locatableToShow == null) Positioned(
         right: 10,
         bottom: 10,
         child: Container(
@@ -146,7 +149,6 @@ class TransitMapState extends State<TransitMap> {
           child: IconButton(
               icon: Icon(Icons.my_location),
               onPressed: () {
-                print(userPosition);
                 setCurrentPositionAndMoveCamera(userPosition);
               }
           ),
@@ -159,7 +161,7 @@ class TransitMapState extends State<TransitMap> {
     db.getNearbyStopsIteratingRange(p.target).then((stops) async {
         Iterable<Future<Marker>> markerMapList = stops.map((stop) async {
           var iconType = IconType.Base;
-          if (widget.stopToShow != null && stop.stopCode == widget.stopToShow!.stopCode) iconType = IconType.Selected;
+          if (widget.selectedStop != null && stop == widget.selectedStop) iconType = IconType.Selected;
           var icon = await mapIcons.getMarkerIconForOperatorAndTypeAsync(operator: stop.operator, iconType: iconType, context: context);
           if(icon != null) {
             return Marker(
@@ -186,7 +188,6 @@ class TransitMapState extends State<TransitMap> {
         });
         final iterableMarkers = await Future.wait(markerMapList);
         setState(() {
-          print("setting markers");
           markers = iterableMarkers.toSet();
           if(widget.additionalMarkers != null) {
             markers = markers.union(widget.additionalMarkers!);

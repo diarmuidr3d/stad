@@ -186,7 +186,6 @@ class RealTimePageState extends State<RealTimePage> {
   void displayStopReal(Stop stop) async {
     RealTimeUtilities.getStopTimings(stop).then((stopData) {
       setState(() {
-        print(stopData);
         this.stopData = stopData;
         loading = false;
       });
