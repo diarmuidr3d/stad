@@ -9,7 +9,7 @@ class TimingCache {
       : this.cacheTime = cacheTime ?? DateTime.now();
 
   get isExpired {
-    return cacheTime.difference(DateTime.now()).inSeconds >= 10;
+    return DateTime.now().difference(cacheTime).inSeconds >= 10;
   }
 
   @override

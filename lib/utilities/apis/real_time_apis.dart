@@ -14,7 +14,9 @@ abstract class RealTimeAPI {
 
   Future<List<Timing>> getTimings(
       {required String stopCode, bool forceUpdate = false}) async {
+    print("getting timings - $stopCode, $forceUpdate");
     if (!forceUpdate && timingCache != null && !timingCache!.isExpired) {
+      print("returning cached timings $timingCache");
       return timingCache!.timings;
     } else if (forceUpdate || timingCache == null || timingCache!.isExpired) {
       List<Timing> timings = await getLatestTimings(stopCode);
