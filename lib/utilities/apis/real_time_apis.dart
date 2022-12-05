@@ -6,17 +6,30 @@ import 'package:xpath/xpath.dart';
 
 import 'package:stad/models/models.dart';
 
+import '../../models/timing_cache.dart';
 import '../../models/trip.dart';
 import 'bus_eireann.dart';
 
 abstract class RealTimeAPI {
 
-  Future<List<Timing>> getTimings(String stopCode);
+  TimingCache? timingCache;
+
+  Future<List<Timing>> getTimings({required String stopCode, bool forceUpdate = false}) async {
+    if(!forceUpdate && timingCache != null && !timingCache!.isExpired) {
+      return timingCache!.timings;
+    } else if(forceUpdate || timingCache == null || timingCache!.isExpired) {
+      List<Timing> timings = await getLatestTimings(stopCode);
+      timingCache = new TimingCache(timings: timings);
+    }
+    return timingCache!.timings;
+  }
+
+  Future<List<Timing>> getLatestTimings(String stopCode);
 
   Future<GeoLocation?> getVehicleLocationForTrip(Trip trip);
 }
 
-class DublinBusAPI implements RealTimeAPI {
+class DublinBusAPI extends RealTimeAPI {
 
   Future<ETree> _getRealTimeStopDataTree(String stopCode) async {
     var envelope =
@@ -46,7 +59,7 @@ class DublinBusAPI implements RealTimeAPI {
   }
 
   @override
-  Future<List<Timing>> getTimings(String stopCode) async {
+  Future<List<Timing>> getLatestTimings(String stopCode) async {
     var tree = await _getRealTimeStopDataTree(stopCode);
     final xmlStopData = tree.xpath('/soap/soap/GetRealTimeStopDataResponse/GetRealTimeStopDataResult/diffgr/DocumentElement/StopData');
     var timings;
@@ -109,7 +122,7 @@ class DublinBusAPI implements RealTimeAPI {
 
 }
 
-class IarnrodEireannAPI  implements RealTimeAPI {
+class IarnrodEireannAPI extends RealTimeAPI {
   
   Future<ETree> _getRealTimeStopDataTree(String stopCode) async {
     final irishRailRTPI = Uri.http(
@@ -123,7 +136,7 @@ class IarnrodEireannAPI  implements RealTimeAPI {
   }
 
   @override
-  Future<List<Timing>> getTimings(String stopCode) async {
+  Future<List<Timing>> getLatestTimings(String stopCode) async {
     var tree = await _getRealTimeStopDataTree(stopCode);
     final xmlStopData = tree.xpath('/ArrayOfObjStationData/objStationData');
     var timings;
@@ -153,7 +166,7 @@ class IarnrodEireannAPI  implements RealTimeAPI {
 
 
 
-class LuasAPI  implements RealTimeAPI {
+class LuasAPI extends RealTimeAPI {
 
   Future<ETree> _getRealTimeStopDataTree(String stopCode) async {
     final luasRTPI = Uri.http(
@@ -170,7 +183,7 @@ class LuasAPI  implements RealTimeAPI {
   }
 
   @override
-  Future<List<Timing>> getTimings(String stopCode) async {
+  Future<List<Timing>> getLatestTimings(String stopCode) async {
     var tree = await _getRealTimeStopDataTree(stopCode);
     final xmlStopData = tree.xpath('/stopInfo/direction/tram');
     var timings = <Timing>[];
@@ -202,24 +215,25 @@ class RealTimeUtilities {
 
   static Future<RealTimeStopData> getStopTimings(Stop stop) async {
     final stopData = RealTimeStopData(stop: stop);
+    RealTimeAPI api;
+    switch (stop.operator) {
+      case Operator.BusEireann:
+        api = BusEireannAPI();
+        break;
+      case Operator.DublinBus:
+        api = DublinBusAPI();
+        break;
+      case Operator.IarnrodEireann:
+        api = IarnrodEireannAPI();
+        break;
+      case Operator.Luas:
+        api = LuasAPI();
+        break;
+      case null:
+        throw Exception("No operator for stop ${stop.stopCode}");
+    }
     try {
-      switch (stop.operator) {
-        case Operator.BusEireann:
-          stopData.timings = await BusEireannAPI().getTimings(stop.apiStopCode);
-          break;
-        case Operator.DublinBus:
-          stopData.timings = await DublinBusAPI().getTimings(stop.stopCode);
-          break;
-        case Operator.IarnrodEireann:
-          stopData.timings =
-          await IarnrodEireannAPI().getTimings(stop.stopCode);
-          break;
-        case Operator.Luas:
-          stopData.timings = await LuasAPI().getTimings(stop.stopCode);
-          break;
-        case null:
-          throw Exception("No operator for stop ${stop.stopCode}");
-      }
+      stopData.timings = await api.getTimings(stopCode: stop.apiStopCode);
     } catch (SocketException) {}
     if (stopData.timings != null) stopData.timings!.sort((a, b) => a.dueMins.compareTo(b.dueMins));
     return stopData;

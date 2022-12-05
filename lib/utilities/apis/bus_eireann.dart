@@ -10,7 +10,15 @@ import 'package:stad/utilities/apis/real_time_apis.dart';
 import '../../models/trip.dart';
 import '../database.dart';
 
-class BusEireannAPI  implements RealTimeAPI {
+class BusEireannAPI extends RealTimeAPI {
+
+  static final BusEireannAPI _singleton = new BusEireannAPI._internal();
+
+  factory BusEireannAPI() {
+    return _singleton;
+  }
+
+  BusEireannAPI._internal();
 
   Future<Map<String, dynamic>> _getRealTimeDataTree(Uri uri) async {
     HttpClient client = new HttpClient();
@@ -85,11 +93,11 @@ class BusEireannAPI  implements RealTimeAPI {
     return null;
   }
 
-  @override
-  Future<List<Timing>> getTimings(String stopCode) async {
+  Future<List<Timing>> getLatestTimings(String stopCode) async {
     var stopMap = await _getRealTimeStopDataTree(stopCode);
     var timings = <Timing>[];
     for (var v in stopMap.values) {
+      print(v);
       final timing = await parseStopPassageAndCreateTiming(v);
       if(timing != null) timings.add(timing);
     }

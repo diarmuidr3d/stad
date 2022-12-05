@@ -96,7 +96,7 @@ class StopViewState extends State<StopView> {
   }
 
   void startSearching(BuildContext context) {
-    Navigator.of(context, rootNavigator: true).pop();
+    Navigator.pop(context);
   }
 
   void getTimings(Stop stop) async {

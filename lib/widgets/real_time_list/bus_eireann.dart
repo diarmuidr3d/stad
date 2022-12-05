@@ -33,7 +33,7 @@ class BusEireannItem extends RealTimeItem {
   void viewTrip() {
     if(this.timing.trip != null) {
       Navigator.push(context, MaterialPageRoute(
-          builder: (context) => TripView(trip: this.timing.trip!,)));
+          builder: (context) => TripView(trip: this.timing.trip!, stop: this.stop)));
     }
   }
 }
