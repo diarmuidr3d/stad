@@ -5,8 +5,8 @@ const CACHE_EXPIRY_SECONDS = 10;
 class TimingCache {
   List<Timing> timings;
   DateTime cacheTime;
-  TimingCache({required this.timings, DateTime? cacheTime}) :
-        this.cacheTime = cacheTime ?? DateTime.now();
+  TimingCache({required this.timings, DateTime? cacheTime})
+      : this.cacheTime = cacheTime ?? DateTime.now();
 
   get isExpired {
     return cacheTime.difference(DateTime.now()).inSeconds >= 10;

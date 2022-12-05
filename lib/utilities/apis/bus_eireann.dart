@@ -11,7 +11,6 @@ import '../../models/trip.dart';
 import '../database.dart';
 
 class BusEireannAPI extends RealTimeAPI {
-
   static final BusEireannAPI _singleton = new BusEireannAPI._internal();
 
   factory BusEireannAPI() {
@@ -22,7 +21,8 @@ class BusEireannAPI extends RealTimeAPI {
 
   Future<Map<String, dynamic>> _getRealTimeDataTree(Uri uri) async {
     HttpClient client = new HttpClient();
-    client.badCertificateCallback =((X509Certificate cert, String host, int port) => true);
+    client.badCertificateCallback =
+        ((X509Certificate cert, String host, int port) => true);
     HttpClientRequest request = await client.openUrl("GET", uri);
     HttpClientResponse response = await request.close();
     String reply = await response.transform(utf8.decoder).join();
@@ -30,37 +30,42 @@ class BusEireannAPI extends RealTimeAPI {
   }
 
   Future<Map<String, dynamic>> _getRealTimeStopDataTree(String stopCode) async {
-    return _getRealTimeDataTree(Uri.parse('http://buseireann.ie/inc/proto/stopPassageTdi.php?stop_point=$stopCode'));
+    return _getRealTimeDataTree(Uri.parse(
+        'http://buseireann.ie/inc/proto/stopPassageTdi.php?stop_point=$stopCode'));
   }
 
   Future<Map<String, dynamic>> _getRealTimeTripDataTree(Trip trip) async {
     String tripId = trip.id;
-    return _getRealTimeDataTree(Uri.parse('http://buseireann.ie/inc/proto/stopPassageTdi.php?trip=$tripId'));
+    return _getRealTimeDataTree(Uri.parse(
+        'http://buseireann.ie/inc/proto/stopPassageTdi.php?trip=$tripId'));
   }
 
   Future<Timing?> parseStopPassageAndCreateTiming(stopValues) async {
     if (stopValues != 0 && stopValues["departure_data"] != null) {
       final departureData = stopValues["departure_data"];
       if (departureData == null) return null; // TODO: handle arrivals
-      final routeNum = await RouteDB().getRouteNumForApiNum(
-          stopValues["route_duid"]["duid"]);
+      final routeNum = await RouteDB()
+          .getRouteNumForApiNum(stopValues["route_duid"]["duid"]);
       final realTime = departureData["actual_passage_time_utc"] != null;
-      final dueTime = realTime ? departureData["actual_passage_time_utc"] : departureData["scheduled_passage_time_utc"];
+      final dueTime = realTime
+          ? departureData["actual_passage_time_utc"]
+          : departureData["scheduled_passage_time_utc"];
       final dueIn = DateTime.fromMillisecondsSinceEpoch(dueTime * 1000)
-          .difference(DateTime.now()).inMinutes;
+          .difference(DateTime.now())
+          .inMinutes;
       return Timing(
-          dueMins: dueIn,
-          heading: departureData["multilingual_direction_text"]["defaultValue"],
-          journeyReference: stopValues["trip_duid"]["duid"],
-          route: routeNum,
-          realTime: realTime,
-          trip: parseTrip(stopValues),
+        dueMins: dueIn,
+        heading: departureData["multilingual_direction_text"]["defaultValue"],
+        journeyReference: stopValues["trip_duid"]["duid"],
+        route: routeNum,
+        realTime: realTime,
+        trip: parseTrip(stopValues),
       );
     }
   }
 
   Trip? parseTrip(stopValues) {
-    if(stopValues["trip_duid"]["duid"] != null) {
+    if (stopValues["trip_duid"]["duid"] != null) {
       return Trip(
         id: stopValues["trip_duid"]["duid"],
         api: this,
@@ -71,24 +76,24 @@ class BusEireannAPI extends RealTimeAPI {
   }
 
   Vehicle? parseVehicle(stopValues) {
-    if(stopValues["vehicle_duid"]["duid"] != null) {
+    if (stopValues["vehicle_duid"]["duid"] != null) {
       return Vehicle(
         id: stopValues["vehicle_duid"]["duid"],
         location: _beLatLngToGeoLocation(
             latitude: stopValues["latitude"],
-            longitude: stopValues["longitude"]
-        ),
+            longitude: stopValues["longitude"]),
       );
     }
     return null;
   }
 
   GeoLocation? parseStopPassageAndGetVehicleLocation(stopValues) {
-    if (stopValues != 0 && stopValues["latitude"] != null && stopValues["longitude"] != null) {
+    if (stopValues != 0 &&
+        stopValues["latitude"] != null &&
+        stopValues["longitude"] != null) {
       return GeoLocation(
           latitude: _be_lat_or_lon_to_degree(stopValues["latitude"]),
-          longitude: _be_lat_or_lon_to_degree(stopValues["longitude"])
-      );
+          longitude: _be_lat_or_lon_to_degree(stopValues["longitude"]));
     }
     return null;
   }
@@ -99,7 +104,7 @@ class BusEireannAPI extends RealTimeAPI {
     for (var v in stopMap.values) {
       print(v);
       final timing = await parseStopPassageAndCreateTiming(v);
-      if(timing != null) timings.add(timing);
+      if (timing != null) timings.add(timing);
     }
     return timings;
   }
@@ -110,7 +115,7 @@ class BusEireannAPI extends RealTimeAPI {
     GeoLocation? location;
     for (var v in stopMap.values) {
       final _location = parseStopPassageAndGetVehicleLocation(v);
-      if(_location != null) {
+      if (_location != null) {
         location = _location;
         trip.vehicle?.location = location;
         break;
@@ -119,15 +124,15 @@ class BusEireannAPI extends RealTimeAPI {
     return location;
   }
 
-  GeoLocation _beLatLngToGeoLocation({required int latitude, required int longitude}) {
+  GeoLocation _beLatLngToGeoLocation(
+      {required int latitude, required int longitude}) {
     return GeoLocation(
-        latitude: _be_lat_or_lon_to_degree(latitude),
-        longitude: _be_lat_or_lon_to_degree(longitude),
+      latitude: _be_lat_or_lon_to_degree(latitude),
+      longitude: _be_lat_or_lon_to_degree(longitude),
     );
   }
 
   double _be_lat_or_lon_to_degree(int lat_or_lon) {
     return lat_or_lon / 3600000.0;
   }
-
 }
